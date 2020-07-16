@@ -1,0 +1,7 @@
+#!/bin/bash
+
+for file in $PWD/assets/Xi/*;
+do
+cp $file ${file/Left/Right};
+sips -f horizontal $file;
+done
