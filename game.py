@@ -81,11 +81,14 @@ class Game:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
             self.mingle()         
-#            self.calculate_win()
+            self.calculate_win()
+            self.calculate_lose()
         elif self.this_screen.name == "Options":
             self.this_screen.blit_buttons(self.options_buttons)
         elif self.this_screen.name == "Win":
             self.this_screen.blit_buttons(self.win_buttons)
+        elif self.this_screen.name == "Lose":
+            self.this_screen.blit_buttons(self.lose_buttons)
         elif self.this_screen.name == "ChooseCharacter":
             self.this_screen.blit_buttons(self.choose_character_buttons)
             self.this_screen.show(self.character_profiles)
@@ -299,7 +302,6 @@ class Game:
             pass
         for character in self.character_profiles.values():
             if character['display']:
-                print("AUDIO: " + character['name'])
                 self.active_character_audio = character['audio'][random.randint(0, len(character['audio']) - 1)].play()
  
     def choose_character(self):
@@ -323,7 +325,7 @@ class Game:
 
     def play_game(self): 
         self.set_screens(self.loading_screen)
- 
+
     def increase_difficulty(self):
         self.difficulty_level += 1
         if self.difficulty_level > 11:
@@ -340,32 +342,35 @@ class Game:
         option.change_text(string + str(count))
 
     def calculate_mean(self):
-        mean = 0
-#        total_agents = self.nonplayable_agents + self.playable_agents
         total_agents = self.nonplayable_agents
+
+        if len(total_agents) == 0:
+            return 0
+
+        mean = 0
         for agent in total_agents:
             mean += agent.get_mood()
         return mean / len(total_agents)
 
     def calculate_sd(self):
-#        total_agents = self.nonplayable_agents + self.playable_agents
         total_agents = self.nonplayable_agents
+
+        if len(total_agents) == 0:
+            return 0
+
         mean = self.calculate_mean()
         squares = []
-#        print("*")
         for agent in total_agents:
-#            print(agent.name  + str(agent.mood))
             squares.append(pow(agent.get_mood() - mean, 2))
         sd1 = sum(squares) - 1 / len(total_agents)
         sd = math.sqrt(sd1) if sd1 > 0 else 0
-#        print("SD: " + str(sd))
-#        print("*")
         return sd
 
     def calculate_win(self):
-        if (self.calculate_mean() > 70) and (self.calculate_sd() < 30):
+        if (self.calculate_mean() > 90) and (self.calculate_sd() < 30):
             self.set_screens(self.win_screen)
 
     def calculate_lose(self):
-        if (self.calculate_mean() < 30) or (not self.nonplayable_agents):
+        if not self.nonplayable_agents:
+#        if (self.calculate_mean() < 30) or (not self.nonplayable_agents):
             self.set_screens(self.lose_screen)

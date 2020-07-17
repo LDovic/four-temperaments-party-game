@@ -86,7 +86,6 @@ class OptionsScreen(Screen):
         super().__init__(name, on, display)
 
     def play(self, options_buttons):
-        self.fill()
         for button in options_buttons:
             self.display.blit(button.surface, button.rect)
 
@@ -103,8 +102,6 @@ class LoadingScreen(Screen):
         super().__init__(name, on, display)
 
     def play(self, loading_buttons):
-        self.fill()
-
         for button in loading_buttons:
             self.display.blit(button.surface, button.rect)
 

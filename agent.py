@@ -112,7 +112,7 @@ class NonPlayableAgent(Agent):
     
     def stop(self):
         distance = self.rect.x - self.target
-        if (distance == -100) or (distance == 100):
+        if (distance in range(-90, -110)) or (distance in range(90, 110)):
             self.change_vector(0)
             self.target = self.rect.x
 
