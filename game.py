@@ -227,13 +227,13 @@ class Game:
 
             if self.quit.rect.collidepoint(pos):
                 return True
-            if self.new_game.rect.collidepoint(pos):
+            if self.new_game.rect.collidepoint(pos):                
                 self.set_screens(self.choose_character_screen)
+                self.choose_character()
 
         elif self.this_screen.name == "ChooseCharacter":
             if self.next.rect.collidepoint(pos):
                 self.choose_character()
-                self.play_character_audio()
             if self.play.rect.collidepoint(pos):
                 self.play_game()
 
@@ -299,6 +299,7 @@ class Game:
             pass
         for character in self.character_profiles.values():
             if character['display']:
+                print("AUDIO: " + character['name'])
                 self.active_character_audio = character['audio'][random.randint(0, len(character['audio']) - 1)].play()
  
     def choose_character(self):
@@ -310,12 +311,14 @@ class Game:
             self.choose_character_tick = 0
 
         for name, character in self.character_profiles.items():
-            tick += 1
-            if tick == self.choose_character_tick or end_of_loop:                
+            if tick == (self.choose_character_tick - 1) or end_of_loop:                
                 character['display'] = False
-            if tick == self.choose_character_tick + 1:
+            if tick == self.choose_character_tick:
                 self.player = character['name']
                 character['display'] = True
+            tick += 1
+
+        self.play_character_audio()
         self.choose_character_tick += 1
 
     def play_game(self): 
