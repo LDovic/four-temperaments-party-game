@@ -16,7 +16,7 @@ class MusicPlayer():
 
         self.next_track_button = Button("Next Track", (0, 0), BLACK, BUTTON_FONT_SIZE)
         self.play_button = Button("Play", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.stop_button = Button("Stop", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.stop_button = Button("Stop", (0, 0), GREY, BUTTON_FONT_SIZE)
 
         self.track_info = Button("Stopped", (0, 0), BLACK, BUTTON_FONT_SIZE)
 
@@ -70,10 +70,14 @@ class MusicPlayer():
            self.track_obj.stop()
        except AttributeError:
            pass
+       self.stop_button.change_color(GREY)
+       self.play_button.change_color(BLACK)
 
     def play(self):
        self.now_playing = self.tracks[self.track_index]
        self.track_obj = self.tracks[self.track_index]['track'].play()
+       self.stop_button.change_color(BLACK)
+       self.play_button.change_color(GREY)
 
     def has_stopped(self):
        if self.now_playing is not False:

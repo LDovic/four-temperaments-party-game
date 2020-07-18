@@ -254,13 +254,9 @@ class Game:
             if self.musicplayer.now_playing is False:
                 if self.musicplayer.play_button.rect.collidepoint(pos):
                     self.musicplayer.play()
-                    self.musicplayer.stop_button.change_color(BLACK)
-                    self.musicplayer.play_button.change_color(GREY)
             else:
                 if self.musicplayer.stop_button.rect.collidepoint(pos):
                     self.musicplayer.stop()
-                    self.musicplayer.play_button.change_color(BLACK)
-                    self.musicplayer.stop_button.change_color(GREY)
 
     def mouse_hover(self, pos):
         for agent in self.nonplayable_agents:
@@ -350,7 +346,7 @@ class Game:
 
     def increase_difficulty(self):
         self.difficulty_level += 1
-        if self.difficulty_level > 11:
+        if self.difficulty_level > 9:
             self.difficulty_level = 1 
         self.update_options(self.difficulty, "Difficulty: ", self.difficulty_level)
 
