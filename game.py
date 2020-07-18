@@ -70,10 +70,11 @@ class Game:
         if self.this_screen.name == "Start":
             self.this_screen.blit_buttons(self.meta_buttons)
         elif self.this_screen.name == "Loading":
-            self.this_screen.play(self.loading_buttons)
+            self.this_screen.blit_buttons(self.loading_buttons)
             self.create_agents() 
         elif self.this_screen.name == "Game":           
             self.this_screen.blit_buttons(self.in_game_stats + self.musicplayer.musicplayer_primary_buttons + self.musicplayer.musicplayer_secondary_buttons)
+            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_primary_buttons, (SCREEN_HEIGHT / 4) * 3, 100)
             self.this_screen.update_track(self.musicplayer)
             self.this_screen.update_mean(self.mean, self.calculate_mean())
             self.this_screen.update_sd(self.sd, self.calculate_sd()) 
@@ -84,6 +85,7 @@ class Game:
             self.calculate_win()
             self.calculate_lose()
         elif self.this_screen.name == "Options":
+            self.this_screen.position_buttons_vertical_center(self.options_buttons)
             self.this_screen.blit_buttons(self.options_buttons)
         elif self.this_screen.name == "Win":
             self.this_screen.blit_buttons(self.win_buttons)
@@ -134,7 +136,6 @@ class Game:
         self.options_buttons.append(self.guests)
         self.options_buttons.append(self.difficulty)
         self.options_buttons.append(self.close)
-        self.options_screen.position_buttons_vertical_center(self.options_buttons)
 
     def attach_profile_audios(self):
         contents = os.listdir(CHARACTER_AUDIO)
@@ -243,10 +244,16 @@ class Game:
         elif self.this_screen.name == "Game":
             if self.musicplayer.next_track_button.rect.collidepoint(pos):
                 self.musicplayer.change_track()
-            if self.musicplayer.stop_button.rect.collidepoint(pos):
-                self.musicplayer.stop()
-            if self.musicplayer.play_button.rect.collidepoint(pos):
-                self.musicplayer.play()
+            if self.musicplayer.now_playing is False:
+                if self.musicplayer.play_button.rect.collidepoint(pos):
+                    self.musicplayer.play()
+                    self.musicplayer.stop_button.change_color(BLACK)
+                    self.musicplayer.play_button.change_color(GREY)
+            else:
+                if self.musicplayer.stop_button.rect.collidepoint(pos):
+                    self.musicplayer.stop()
+                    self.musicplayer.play_button.change_color(BLACK)
+                    self.musicplayer.stop_button.change_color(GREY)
 
     def event_listen(self):
         for event in pygame.event.get():
@@ -367,7 +374,7 @@ class Game:
         return sd
 
     def calculate_win(self):
-        if (self.calculate_mean() > 90) and (self.calculate_sd() < 30):
+        if (self.calculate_mean() > 95) and (self.calculate_sd() < 30):
             self.set_screens(self.win_screen)
 
     def calculate_lose(self):

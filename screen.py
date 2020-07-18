@@ -63,9 +63,9 @@ class GameScreen(Screen):
         agent.positivity_button.update_color(agent.name, agent.get_positivity() * 10)
         agent.mood_button.update_color(agent.name, agent.get_mood())
 
-        agent.mood_button.change_position(agent.rect.x, agent.rect.y - 30) 
-        agent.positivity_button.change_position(agent.rect.x, agent.rect.y - 20) 
-        agent.extroversion_button.change_position(agent.rect.x, agent.rect.y - 10) 
+        agent.mood_button.change_position_xy(agent.rect.x, agent.rect.y - 30) 
+        agent.positivity_button.change_position_xy(agent.rect.x, agent.rect.y - 20) 
+        agent.extroversion_button.change_position_xy(agent.rect.x, agent.rect.y - 10) 
 
         self.display.blit(agent.extroversion_button.surface, agent.extroversion_button.rect)
         self.display.blit(agent.positivity_button.surface, agent.positivity_button.rect)
@@ -85,10 +85,6 @@ class OptionsScreen(Screen):
     def __init__(self, name, on, display):
         super().__init__(name, on, display)
 
-    def play(self, options_buttons):
-        for button in options_buttons:
-            self.display.blit(button.surface, button.rect)
-
 class WinScreen(Screen):
     def __init__(self, name, on, display):
         super().__init__(name, on, display)
@@ -100,10 +96,6 @@ class LoseScreen(Screen):
 class LoadingScreen(Screen):
     def __init__(self, name, on, display):
         super().__init__(name, on, display)
-
-    def play(self, loading_buttons):
-        for button in loading_buttons:
-            self.display.blit(button.surface, button.rect)
 
 class ChooseCharacterScreen(Screen):
     def __init__(self, name, on, display):

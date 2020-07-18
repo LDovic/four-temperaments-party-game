@@ -26,9 +26,16 @@ class Button:
         self.rect.y = self.y
         self.text = text
 
-    def change_position(self, x, y):
+    def change_position_xy(self, x, y):
         self.rect.x = x
         self.rect.y = y
+
+    def change_position_centerxy(self, x, y):
+        self.rect.centerx = x
+        self.rect.cetnery = y        
+
+    def change_color(self, color):
+        self.surface, self.rect = self.font.render(self.text, color)
 
     def update_color(self, name,  attribute):        
         x = round((255/100) * attribute)
