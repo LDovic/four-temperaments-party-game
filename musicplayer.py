@@ -62,6 +62,7 @@ class MusicPlayer():
        self.track_index += 1       
        if self.track_index >= self.no_of_tracks:
            self.track_index = 0
+       self.play()
 
     def stop(self):
        try:
@@ -73,3 +74,8 @@ class MusicPlayer():
     def play(self):
        self.now_playing = self.tracks[self.track_index]
        self.track_obj = self.tracks[self.track_index]['track'].play()
+
+    def has_stopped(self):
+       if self.now_playing is not False:
+           if not self.track_obj.is_playing():
+               self.change_track()

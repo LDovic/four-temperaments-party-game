@@ -40,6 +40,7 @@ class Agent:
         self.buttons.append(self.positivity_button)
         self.buttons.append(self.mood_button)
         self.playable = playable
+        self.display_info = False
 
     def get_mood(self):
         return self.personality.mood

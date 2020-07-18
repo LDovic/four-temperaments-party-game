@@ -65,11 +65,7 @@ class GameScreen(Screen):
 
         agent.mood_button.change_position_xy(agent.rect.x, agent.rect.y - 30) 
         agent.positivity_button.change_position_xy(agent.rect.x, agent.rect.y - 20) 
-        agent.extroversion_button.change_position_xy(agent.rect.x, agent.rect.y - 10) 
-
-        self.display.blit(agent.extroversion_button.surface, agent.extroversion_button.rect)
-        self.display.blit(agent.positivity_button.surface, agent.positivity_button.rect)
-        self.display.blit(agent.mood_button.surface, agent.mood_button.rect)
+        agent.extroversion_button.change_position_xy(agent.rect.x, agent.rect.y - 10)
 
     def update_track(self, musicplayer):
         loaded_track = musicplayer.tracks[musicplayer.track_index]

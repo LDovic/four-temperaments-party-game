@@ -46,7 +46,7 @@
  [],
  False,
  False,
- 1594919735,
+ 1595070972,
  [('run',
    '/Users/ludovicnoble/pygame5/venv/lib/python3.8/site-packages/PyInstaller/bootloader/Darwin-64bit/run',
    'EXECUTABLE')])

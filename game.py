@@ -75,12 +75,21 @@ class Game:
         elif self.this_screen.name == "Game":           
             self.this_screen.blit_buttons(self.in_game_stats + self.musicplayer.musicplayer_primary_buttons + self.musicplayer.musicplayer_secondary_buttons)
             self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_primary_buttons, (SCREEN_HEIGHT / 4) * 3, 100)
+            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_secondary_buttons, (SCREEN_HEIGHT / 4) * 3.5, 100)
             self.this_screen.update_track(self.musicplayer)
+            self.musicplayer.has_stopped()
+
             self.this_screen.update_mean(self.mean, self.calculate_mean())
             self.this_screen.update_sd(self.sd, self.calculate_sd()) 
+
             for agent in self.nonplayable_agents + self.playable_agents:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
+                if agent.display_info:
+                    self.this_screen.blit_buttons(agent.buttons)
+#                    self.this_screen.display.blit(agent.extroversion_button.surface, agent.extroversion_button.rect)
+#                    self.this_screen.display.blit(agent.positivity_button.surface, agent.positivity_button.rect)
+#                    self.this_screen.display.blit(agent.mood_button.surface, agent.mood_button.rect) 
             self.mingle()         
             self.calculate_win()
             self.calculate_lose()
@@ -103,8 +112,6 @@ class Game:
         self.win_screen = WinScreen("Win", False, self.display)
         self.lose_screen = LoseScreen("Lose", False, self.display)
         self.game_screen = GameScreen("Game", False, self.display)
-        self.game_screen.position_buttons_horizontal(self.musicplayer.musicplayer_primary_buttons, (SCREEN_HEIGHT / 4) * 3, 100)
-        self.game_screen.position_buttons_horizontal(self.musicplayer.musicplayer_secondary_buttons, (SCREEN_HEIGHT / 4) * 3.5, 100)
         self.options_screen = OptionsScreen("Options", False, self.display)
         self.start_screen = StartScreen("Start", True, self.display) 
         self.back_screen = self.start_screen
@@ -255,12 +262,19 @@ class Game:
                     self.musicplayer.play_button.change_color(BLACK)
                     self.musicplayer.stop_button.change_color(GREY)
 
+    def mouse_hover(self, pos):
+        for agent in self.nonplayable_agents:
+            if agent.rect.collidepoint(pos): 
+                agent.display_info = True
+            else:
+                agent.display_info = False
+
     def event_listen(self):
+        pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 return True
             if event.type == pygame.MOUSEBUTTONDOWN:
-                pos = pygame.mouse.get_pos()
                 if self.mouse_button_down(pos) is True:
                     return True
             if self.this_screen.name == "Game":
@@ -268,6 +282,7 @@ class Game:
                     self.key_down(event.key)
                 if event.type == pygame.KEYUP:
                     self.key_up(event.key)
+                self.mouse_hover(pos)
 
     """OTHER"""
 
