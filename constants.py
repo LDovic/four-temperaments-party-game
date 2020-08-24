@@ -25,6 +25,7 @@ else:
     CWD = getattr(sys, '_MEIPASS', path.abspath(path.dirname(__file__)))
 
 ASSETS = CWD + "/assets/"
+ASSETS2 = CWD + "/assets2/"
 CHARACTER_AUDIO = CWD + "/audio/CharacterAudio/"
 SOUNDTRACK = CWD + "/audio/MusicPlayer/"
 FONTS = CWD + "/fonts/"

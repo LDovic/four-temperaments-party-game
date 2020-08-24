@@ -47,7 +47,7 @@ class GameScreen(Screen):
         self.tick = 0
 
     def update_agents(self, agent):
-        if agent.vector == 0:
+        if agent.xvector == 0 and agent.yvector == 0:
             self.display.blit(agent.Rstand, agent.rect) if agent.facing_right else self.display.blit(agent.Lstand, agent.rect) 
             return
         self.tick += 1

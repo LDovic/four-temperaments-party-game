@@ -5,6 +5,7 @@ from agent import *
 from button import Button
 from screen import * 
 from musicplayer import *
+from background import *
 import math
 import random
 import simpleaudio as audio
@@ -29,6 +30,7 @@ class Game:
         self.create_options_buttons()
         self.create_character_profiles()
         self.attach_profile_audios()
+        self.create_background()
 
         """Loading buttons"""
         self.loading_buttons = []
@@ -73,14 +75,14 @@ class Game:
             self.this_screen.blit_buttons(self.loading_buttons)
             self.create_agents() 
         elif self.this_screen.name == "Game":           
+            for asset in self.background:
+                self.this_screen.display.blit(asset.image, asset.rect)
+
             self.this_screen.blit_buttons(self.in_game_stats + self.musicplayer.musicplayer_primary_buttons + self.musicplayer.musicplayer_secondary_buttons)
-            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_primary_buttons, (SCREEN_HEIGHT / 4) * 3, 100)
-            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_secondary_buttons, (SCREEN_HEIGHT / 4) * 3.5, 100)
+            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_primary_buttons, (SCREEN_HEIGHT / 4) * 3.5, 100)
+            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_secondary_buttons, (SCREEN_HEIGHT / 4) * 3.8, 100)
             self.this_screen.update_track(self.musicplayer)
             self.musicplayer.has_stopped()
-
-            self.this_screen.update_mean(self.mean, self.calculate_mean())
-            self.this_screen.update_sd(self.sd, self.calculate_sd()) 
 
             for agent in self.nonplayable_agents + self.playable_agents:
                 self.this_screen.update_agents(agent)
@@ -208,20 +210,33 @@ class Game:
         self.player1 = self.playable_agents[0]
         self.set_screens(self.game_screen)
 
+    def create_background(self):
+        self.background = []
+        contents = os.listdir(ASSETS2)
+        for item in contents:
+            if ASSET_FILE_TYPE in item:
+                self.background.append(Background(item, (0, 0)))
+
     """CONTROLS"""
 
     def key_up(self, key):
         if key == pygame.K_LEFT or key == pygame.K_RIGHT:
-            self.player1.change_vector(0)
+            self.player1.change_vector(0, 0)
+        if key == pygame.K_UP or key == pygame.K_DOWN:
+            self.player1.change_vector(0, 1)
 
     def key_down(self, key):
         if key == pygame.K_SPACE:
             self.player1.interact(self.nonplayable_agents)
+        if key == pygame.K_UP:
+            self.player1.change_vector(-5, 1)
+        if key == pygame.K_DOWN:
+            self.player1.change_vector(5, 1)
         if key == pygame.K_LEFT:
-            self.player1.change_vector(-5)
+            self.player1.change_vector(-5, 0)
             self.player1.change_side(False)
         elif key == pygame.K_RIGHT:
-            self.player1.change_vector(5)
+            self.player1.change_vector(5, 0)
             self.player1.change_side(True)
 
     def mouse_button_down(self, pos):

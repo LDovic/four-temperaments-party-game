@@ -25,8 +25,9 @@ class Agent:
         self.rect = self.Lstand.get_rect()
         self.facing_right = True
         self.rect.x = position[0]
-        self.rect.y = 300
-        self.vector = 0
+        self.rect.y = 450
+        self.xvector = 0
+        self.yvector = 0
         self.personality = Personality(positivity)
         self.target = self.rect.x
         self.engaged = False
@@ -64,7 +65,7 @@ class Agent:
     def interact(self, agents):
         for agent in agents:
             proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
-            if proximity and (self is not agent) and (self.vector == 0):                
+            if proximity and (self is not agent) and (self.xvector == 0):                
                 self.engaged = True
                 interaction = (self.personality.positivity + (self.personality.mood / 10) + agent.personality.positivity + (agent.personality.mood / 10))/2 > random.randint(1,20)
                 if (self.personality.update_mood(interaction, 5) is False) and (self.playable is False):
@@ -74,18 +75,28 @@ class Agent:
     def change_side(self, facing_right):
         self.facing_right = facing_right
 
-    def change_vector(self, vector):
-        self.vector = vector
+    def change_vector(self, vector, xy):
+        if xy == 0:
+            self.xvector = vector
+        if xy == 1:
+            self.yvector = vector
 
     def move(self):
-        self.rect.x += self.vector
+        self.rect.x += self.xvector
+        self.rect.y += self.yvector
         if self.leaving is False:
             if self.rect.x < 0:
-                self.vector = 0
+                self.xvector = 0
                 self.rect.x = 0
             if self.rect.x > SCREEN_WIDTH - 100:
-                self.vector = 0
+                self.xvector = 0
                 self.rect.x = SCREEN_WIDTH - 100
+            if self.rect.y < 400:
+                self.yvector = 0
+                self.rect.y = 400
+            if self.rect.y > SCREEN_HEIGHT - 200:
+                self.yvector = 0
+                self.rect.y = SCREEN_HEIGHT - 200
 
     def update_button_colors(self):
         self.personality.mood_button.update_color(self.personality.mood) 
@@ -105,16 +116,16 @@ class NonPlayableAgent(Agent):
     def acquire_target(self, target_x_value):
         self.target = target_x_value
         if self.target > self.rect.x:
-            self.change_vector(5)
+            self.change_vector(5, 0)
             self.change_side(True)
         if self.target < self.rect.x:
-            self.change_vector(-5)
+            self.change_vector(-5, 0)
             self.change_side(False)
     
     def stop(self):
         distance = self.rect.x - self.target
         if (distance in range(-90, -110)) or (distance in range(90, 110)):
-            self.change_vector(0)
+            self.change_vector(0, 0)
             self.target = self.rect.x
 
     def leave(self):
@@ -124,7 +135,7 @@ class NonPlayableAgent(Agent):
             self.leaving = True
 
     def quit(self):
-       if self.vector == 0:
+       if self.xvector == 0:
            self.quitting = True
 
 class PlayableAgent(Agent):
