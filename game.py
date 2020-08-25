@@ -84,14 +84,12 @@ class Game:
             self.this_screen.update_track(self.musicplayer)
             self.musicplayer.has_stopped()
 
-            for agent in self.nonplayable_agents + self.playable_agents:
+            self.total_agents.sort(key=lambda x: x.rect.y, reverse=False)
+            for agent in self.total_agents:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
-                if agent.display_info:
+                if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)
-#                    self.this_screen.display.blit(agent.extroversion_button.surface, agent.extroversion_button.rect)
-#                    self.this_screen.display.blit(agent.positivity_button.surface, agent.positivity_button.rect)
-#                    self.this_screen.display.blit(agent.mood_button.surface, agent.mood_button.rect) 
             self.mingle()         
             self.calculate_win()
             self.calculate_lose()
@@ -187,7 +185,7 @@ class Game:
                             item + 'LeftStand',
                             item + 'Right',
                             item + 'RightStand',
-                            (random.randint(0, SCREEN_WIDTH), 0),
+                            (random.randint(0, SCREEN_WIDTH), random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)),
                             self.difficulty_level,
                             False
                             )
@@ -208,6 +206,7 @@ class Game:
             x += 1 
 
         self.player1 = self.playable_agents[0]
+        self.total_agents = self.nonplayable_agents + self.playable_agents
         self.set_screens(self.game_screen)
 
     def create_background(self):
@@ -220,22 +219,36 @@ class Game:
     """CONTROLS"""
 
     def key_up(self, key):
-        if key == pygame.K_LEFT or key == pygame.K_RIGHT:
+        if key == pygame.K_0:
+            for agent in self.total_agents:
+                agent.personality.display_info = False
+        if key == pygame.K_a or key == pygame.K_d:
             self.player1.change_vector(0, 0)
-        if key == pygame.K_UP or key == pygame.K_DOWN:
+        if key == pygame.K_w or key == pygame.K_s:
             self.player1.change_vector(0, 1)
 
     def key_down(self, key):
-        if key == pygame.K_SPACE:
+        if key == pygame.K_2:
+                self.musicplayer.change_track()
+        if self.musicplayer.now_playing is False:
+                if key == pygame.K_1:
+                    self.musicplayer.play()
+        else:
+            if key == pygame.K_3:
+                self.musicplayer.stop()
+        if key == pygame.K_0:
+            for agent in self.total_agents:
+                agent.personality.display_info = True
+        if key == pygame.K_e:
             self.player1.interact(self.nonplayable_agents)
-        if key == pygame.K_UP:
+        if key == pygame.K_w:
             self.player1.change_vector(-5, 1)
-        if key == pygame.K_DOWN:
+        if key == pygame.K_s:
             self.player1.change_vector(5, 1)
-        if key == pygame.K_LEFT:
+        if key == pygame.K_a:
             self.player1.change_vector(-5, 0)
             self.player1.change_side(False)
-        elif key == pygame.K_RIGHT:
+        elif key == pygame.K_d:
             self.player1.change_vector(5, 0)
             self.player1.change_side(True)
 
@@ -273,13 +286,6 @@ class Game:
                 if self.musicplayer.stop_button.rect.collidepoint(pos):
                     self.musicplayer.stop()
 
-    def mouse_hover(self, pos):
-        for agent in self.nonplayable_agents:
-            if agent.rect.collidepoint(pos): 
-                agent.display_info = True
-            else:
-                agent.display_info = False
-
     def event_listen(self):
         pos = pygame.mouse.get_pos()
         for event in pygame.event.get():
@@ -293,7 +299,6 @@ class Game:
                     self.key_down(event.key)
                 if event.type == pygame.KEYUP:
                     self.key_up(event.key)
-                self.mouse_hover(pos)
 
     """OTHER"""
 
@@ -314,7 +319,8 @@ class Game:
             else:
                 agent.leave()
                 if (agent.feels_extroverted() is True):
-                    agent.acquire_target(random.choice(self.nonplayable_agents).rect.x) 
+                    target = random.choice(self.nonplayable_agents)
+                    agent.acquire_target(target.rect.x, target.rect.y) 
                 agent.interact(self.nonplayable_agents)
             agent.stop()
         for agent in self.nonplayable_agents + self.playable_agents:

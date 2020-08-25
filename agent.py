@@ -25,11 +25,12 @@ class Agent:
         self.rect = self.Lstand.get_rect()
         self.facing_right = True
         self.rect.x = position[0]
-        self.rect.y = 450
+        self.rect.y = position[1]
         self.xvector = 0
         self.yvector = 0
         self.personality = Personality(positivity)
-        self.target = self.rect.x
+        self.targetx = self.rect.x
+        self.targety = self.rect.y
         self.engaged = False
         self.leaving = False
         self.quitting = False
@@ -41,7 +42,6 @@ class Agent:
         self.buttons.append(self.positivity_button)
         self.buttons.append(self.mood_button)
         self.playable = playable
-        self.display_info = False
 
     def get_mood(self):
         return self.personality.mood
@@ -65,7 +65,7 @@ class Agent:
     def interact(self, agents):
         for agent in agents:
             proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
-            if proximity and (self is not agent) and (self.xvector == 0):                
+            if proximity and (self is not agent) and (self.xvector == 0):                 
                 self.engaged = True
                 interaction = (self.personality.positivity + (self.personality.mood / 10) + agent.personality.positivity + (agent.personality.mood / 10))/2 > random.randint(1,20)
                 if (self.personality.update_mood(interaction, 5) is False) and (self.playable is False):
@@ -91,7 +91,7 @@ class Agent:
             if self.rect.x > SCREEN_WIDTH - 100:
                 self.xvector = 0
                 self.rect.x = SCREEN_WIDTH - 100
-            if self.rect.y < 400:
+            if self.rect.y < FLOOR_HEIGHT:
                 self.yvector = 0
                 self.rect.y = 400
             if self.rect.y > SCREEN_HEIGHT - 200:
@@ -110,28 +110,40 @@ class NonPlayableAgent(Agent):
 
     def interrupt(self):
         self.engaged = False
-        target_x_value = self.rect.x - 500 if self.facing_right else self.rect.x + 500
-        self.acquire_target(target_x_value)
+        xrand = random.randint(1, 500)
+        yrand = random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)
+        target_x = self.rect.x - xrand if self.facing_right else self.rect.x + xrand
+        target_y = self.rect.y - yrand if self.rect.y > (FLOOR_HEIGHT + 50) else self.rect.y + yrand 
+        self.acquire_target(target_x, target_y)
 
-    def acquire_target(self, target_x_value):
-        self.target = target_x_value
-        if self.target > self.rect.x:
+    def acquire_target(self, target_x, target_y):
+        self.targetx = target_x
+        self.targety = target_y
+        if self.targetx > self.rect.x:
             self.change_vector(5, 0)
             self.change_side(True)
-        if self.target < self.rect.x:
+        if self.targetx < self.rect.x:
             self.change_vector(-5, 0)
             self.change_side(False)
-    
+        if self.targety > self.rect.y:
+            self.change_vector(5, 1)
+        if self.targety < self.rect.y:
+            self.change_vector(-5, 1)    
+
     def stop(self):
-        distance = self.rect.x - self.target
-        if (distance in range(-90, -110)) or (distance in range(90, 110)):
+        xdistance = self.rect.x - self.targetx
+        if (xdistance in range(-90, -110)) or (xdistance in range(90, 110)):
             self.change_vector(0, 0)
-            self.target = self.rect.x
+            self.targetx = self.rect.x
+        ydistance = self.rect.y - self.targety
+        if (ydistance in range(-90, -110)) or (ydistance in range(90, 110)):
+            self.change_vector(0, 1)
+            self.targety = self.rect.y
 
     def leave(self):
          if self.get_mood() == 0:
 #        if self.personality.mood < ((self.personality.positivity * 10) / 2): 
-            self.acquire_target(-100 if self.facing_right else SCREEN_WIDTH + 100)
+            self.acquire_target(-100 if self.facing_right else SCREEN_WIDTH + 100, self.rect.y)
             self.leaving = True
 
     def quit(self):

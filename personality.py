@@ -10,6 +10,7 @@ class Personality:
         self.mood = self.base_mood
         self.circadian_rhythm_on = False
         self.dt = pygame.time.get_ticks() / 1000
+        self.display_info = False
 
     def calculate_temperament(self):
         if self.extroversion >= 5:
@@ -52,27 +53,27 @@ class Personality:
                 self.mood += 1
 
     def classical(self):
-        if (self.temperament is "Phlegmatic") or (self.temperament is "Melancholic"):
+        if (self.temperament == "Phlegmatic") or (self.temperament == "Melancholic"):
             self.update_mood(True, 10)
-        if (self.temperament is "Sanguine") or (self.temperament is "Choleric"):
+        if (self.temperament == "Sanguine") or (self.temperament == "Choleric"):
             self.update_mood(False, 10)
 
     def pop(self):
-        if (self.temperament is "Sanguine") or (self.temperament is "Phlegmatic"):
+        if (self.temperament == "Sanguine") or (self.temperament == "Phlegmatic"):
             self.update_mood(True, 10)
-        if (self.temperament is "Melancholic") or (self.temperament is "Choleric"):
+        if (self.temperament == "Melancholic") or (self.temperament == "Choleric"):
             self.update_mood(False, 10)
 
     def hiphop(self):
-        if (self.temperament is "Sanguine") or (self.temperament is "Choleric"):
+        if (self.temperament == "Sanguine") or (self.temperament == "Choleric"):
             self.update_mood(True, 10)
-        if (self.temperament is "Melancholic") or (self.temperament is "Phlegmatic"):
+        if (self.temperament == "Melancholic") or (self.temperament == "Phlegmatic"):
             self.update_mood(False, 10)
 
     def metal(self):
-        if (self.temperament is "Melancholic") or (self.temperament is "Choleric"):
+        if (self.temperament == "Melancholic") or (self.temperament == "Choleric"):
             self.update_mood(True, 10)
-        if (self.temperament is "Sanguine") or (self.temperament is "Phlegmatic"):
+        if (self.temperament == "Sanguine") or (self.temperament == "Phlegmatic"):
             self.update_mood(False, 10)
 
     def no_music(self):
