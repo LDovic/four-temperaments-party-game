@@ -101,3 +101,7 @@ class ChooseCharacterScreen(Screen):
         for name, character in character_profiles.items():
             if character['display'] is True:
                 self.display.blit(character['profile'], character['profile'].get_rect(centerx=SCREEN_WIDTH / 2, centery=SCREEN_HEIGHT / 4))
+
+class InstructionsScreen(Screen):
+    def __init__(self, name, on, display):
+        super().__init__(name, on, display)

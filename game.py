@@ -65,6 +65,31 @@ class Game:
         self.choose_character_buttons.append(self.play)
         self.choose_character_screen.position_buttons_horizontal(self.choose_character_buttons, (SCREEN_HEIGHT / 4) * 3, 50)
 
+        """Instructions buttons"""
+        self.instructions_buttons = []
+        self.instructions_text1 = Button("Press E to interact", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text2 = Button("Press WASD to move", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text3 = Button("Press 1, 2 and 3 to control the music", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text4 = Button("Press 0 to see how everyone is feeling", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text5 = Button("If all of the guests leave, you lose!", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text6 = Button("Music will affect different personalities", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text7 = Button("For example, people who are introverted and negative will prefer metal", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text8 = Button("whereas people who are extroverted and positive like pop", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text9 = Button("See how long you can keep the party going", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_text10 = Button("Some guests don't mix well!", (0, 0), BLACK, BUTTON_FONT_SIZE)
+        self.instructions_textplay = Button("Play", (0, 0), BLACK, BUTTON_FONT_SIZE) 
+        self.instructions_buttons.append(self.instructions_text1)
+        self.instructions_buttons.append(self.instructions_text2)
+        self.instructions_buttons.append(self.instructions_text3)
+        self.instructions_buttons.append(self.instructions_text4)
+        self.instructions_buttons.append(self.instructions_text5)
+        self.instructions_buttons.append(self.instructions_text6)
+        self.instructions_buttons.append(self.instructions_text7)
+        self.instructions_buttons.append(self.instructions_text8)
+        self.instructions_buttons.append(self.instructions_text9)
+        self.instructions_buttons.append(self.instructions_text10)
+        self.instructions_buttons.append(self.instructions_textplay)
+
     """RUN - Always running"""
 
     def run(self):
@@ -74,25 +99,28 @@ class Game:
         elif self.this_screen.name == "Loading":
             self.this_screen.blit_buttons(self.loading_buttons)
             self.create_agents() 
-        elif self.this_screen.name == "Game":           
+        elif self.this_screen.name == "Game":
             for asset in self.background:
                 self.this_screen.display.blit(asset.image, asset.rect)
 
-            self.this_screen.blit_buttons(self.in_game_stats + self.musicplayer.musicplayer_primary_buttons + self.musicplayer.musicplayer_secondary_buttons)
-            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_primary_buttons, (SCREEN_HEIGHT / 4) * 3.5, 100)
-            self.this_screen.position_buttons_horizontal(self.musicplayer.musicplayer_secondary_buttons, (SCREEN_HEIGHT / 4) * 3.8, 100)
+            self.this_screen.blit_buttons(self.in_game_stats + self.musicplayer.musicplayer_secondary_buttons)
+
             self.this_screen.update_track(self.musicplayer)
             self.musicplayer.has_stopped()
 
             self.total_agents.sort(key=lambda x: x.rect.y, reverse=False)
+
             for agent in self.total_agents:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)
-            self.mingle()         
-            self.calculate_win()
-            self.calculate_lose()
+            self.mingle() 
+            
+            self.is_game_over()
+        elif self.this_screen.name == "Instructions":
+            self.this_screen.position_buttons_vertical_center(self.instructions_buttons)
+            self.this_screen.blit_buttons(self.instructions_buttons)
         elif self.this_screen.name == "Options":
             self.this_screen.position_buttons_vertical_center(self.options_buttons)
             self.this_screen.blit_buttons(self.options_buttons)
@@ -116,6 +144,7 @@ class Game:
         self.start_screen = StartScreen("Start", True, self.display) 
         self.back_screen = self.start_screen
         self.this_screen = self.start_screen
+        self.instructions_screen = InstructionsScreen("Instructions", False, self.display)
 
         self.screens = []
         self.screens.append(self.choose_character_screen)
@@ -274,6 +303,10 @@ class Game:
             if self.next.rect.collidepoint(pos):
                 self.choose_character()
             if self.play.rect.collidepoint(pos):
+                self.set_screens(self.instructions_screen)
+
+        elif self.this_screen.name == "Instructions":
+            if self.instructions_textplay.rect.collidepoint(pos):
                 self.play_game()
 
         elif self.this_screen.name == "Game":
@@ -409,7 +442,6 @@ class Game:
         if (self.calculate_mean() > 95) and (self.calculate_sd() < 30):
             self.set_screens(self.win_screen)
 
-    def calculate_lose(self):
+    def is_game_over(self):
         if not self.nonplayable_agents:
-#        if (self.calculate_mean() < 30) or (not self.nonplayable_agents):
             self.set_screens(self.lose_screen)
