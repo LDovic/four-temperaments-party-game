@@ -12,7 +12,7 @@ class Agent:
         self.name = name
         self.Limages = []
         self.Rimages = []
-        path = 'assets/' + self.name + '/'
+        path = CHARACTERS + self.name + '/'
         for x in range(1, 9):
             Lpath = os.path.join(path + LSprites + str(x) + ASSET_FILE_TYPE)
             Rpath = os.path.join(path + RSprites + str(x) + ASSET_FILE_TYPE)
@@ -61,6 +61,12 @@ class Agent:
         }
         switch_genre = switcher.get(genre, False) 
         switch_genre() if switch_genre else self.no_music()
+
+    def item_proximity(self, items):
+        for item in items:
+            if (self.rect.x in range(item.rect.x - 101, item.rect.x + 101)) and (self.rect.y in range(item.rect.y - 20, item.rect.y + 20)):
+                return item
+        return False
 
     def interact(self, agents):
         for agent in agents:

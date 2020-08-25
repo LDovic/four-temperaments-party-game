@@ -6,6 +6,7 @@ from button import Button
 from screen import * 
 from musicplayer import *
 from background import *
+from item import *
 import math
 import random
 import simpleaudio as audio
@@ -22,7 +23,7 @@ class Game:
 
         self.tick = 0
         self.choose_character_tick = 0
-        self.invitees = len(os.listdir(ASSETS)) - 1
+        self.invitees = len(os.listdir(CHARACTERS)) - 1
         self.difficulty_level = 1
 
         self.create_screens()
@@ -31,6 +32,7 @@ class Game:
         self.create_character_profiles()
         self.attach_profile_audios()
         self.create_background()
+        self.create_items()
 
         """Loading buttons"""
         self.loading_buttons = []
@@ -105,18 +107,26 @@ class Game:
 
             self.this_screen.blit_buttons(self.in_game_stats + self.musicplayer.musicplayer_secondary_buttons)
 
+            for item in self.items:
+                self.this_screen.update_items(item)
+
             self.this_screen.update_track(self.musicplayer)
             self.musicplayer.has_stopped()
 
             self.total_agents.sort(key=lambda x: x.rect.y, reverse=False)
+
+            for agent in self.playable_agents:
+                item = agent.item_proximity(self.items)
+                if item is not False:
+                    self.this_screen.display.blit(item.button.surface, item.button.rect)      
 
             for agent in self.total_agents:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)
-            self.mingle() 
-            
+            self.mingle()
+ 
             self.is_game_over()
         elif self.this_screen.name == "Instructions":
             self.this_screen.position_buttons_vertical_center(self.instructions_buttons)
@@ -187,13 +197,13 @@ class Game:
 
     def create_character_profiles(self):
         self.character_profiles = {}
-        contents = os.listdir(ASSETS)
+        contents = os.listdir(CHARACTERS)
         for item in contents:
-            if os.path.isdir(ASSETS + item):
+            if os.path.isdir(CHARACTERS + item):
                 self.choose_character_tick += 1
                 self.character_profiles[item] = {}
                 self.character_profiles[item]['name'] = item
-                self.character_profiles[item]['profile'] = pygame.image.load(os.path.join(ASSETS + item + "/" + item + 'RightStand') + ASSET_FILE_TYPE).convert_alpha()
+                self.character_profiles[item]['profile'] = pygame.image.load(os.path.join(CHARACTERS + item + "/" + item + 'RightStand') + ASSET_FILE_TYPE).convert_alpha()
                 self.character_profiles[item]['display'] = False
                 self.character_profiles[item]['selected'] = False 
 
@@ -202,10 +212,10 @@ class Game:
         self.playable_agents = []
         x = 0
 
-        contents = os.listdir(ASSETS)
+        contents = os.listdir(CHARACTERS)
         for item in contents:
             if x <= self.invitees:
-                if os.path.isdir(ASSETS + item):
+                if os.path.isdir(CHARACTERS + item):
                     if self.player != item:
                         self.nonplayable_agents.append(
                             NonPlayableAgent(
@@ -240,10 +250,17 @@ class Game:
 
     def create_background(self):
         self.background = []
-        contents = os.listdir(ASSETS2)
+        contents = os.listdir(BACKGROUND)
         for item in contents:
             if ASSET_FILE_TYPE in item:
                 self.background.append(Background(item, (0, 0)))
+
+    def create_items(self):
+        self.items = []
+        contents = os.listdir(ITEMS)
+        for item in contents:
+            if ASSET_FILE_TYPE in item:
+                self.items.append(Item(item, (400, 390)))
 
     """CONTROLS"""
 
@@ -343,7 +360,7 @@ class Game:
         new_screen.on = True
         self.this_screen = new_screen
 
-    def mingle(self):
+    def mingle(self):                
         for agent in self.nonplayable_agents:
             if agent.quitting is True:
                 self.nonplayable_agents.remove(agent)
@@ -406,7 +423,7 @@ class Game:
 
     def add_guests(self):
         self.invitees += 1
-        if self.invitees >= len(os.listdir(ASSETS)):
+        if self.invitees >= len(os.listdir(CHARACTERS)):
             self.invitees = 1
         self.update_options(self.guests, "Guests: ", self.invitees)
 

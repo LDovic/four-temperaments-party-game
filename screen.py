@@ -46,6 +46,9 @@ class GameScreen(Screen):
         super().__init__(name, on, display)
         self.tick = 0
 
+    def update_items(self, item):
+        self.display.blit(item.image, item.rect)
+
     def update_agents(self, agent):
         if agent.xvector == 0 and agent.yvector == 0:
             self.display.blit(agent.Rstand, agent.rect) if agent.facing_right else self.display.blit(agent.Lstand, agent.rect) 
