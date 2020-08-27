@@ -8,7 +8,7 @@ from button import Button
 from personality import Personality
 
 class Agent:
-    def __init__(self, name, LSprites, Lstand,  RSprites, Rstand, position, positivity, playable):
+    def __init__(self, name, personality, LSprites, Lstand,  RSprites, Rstand, position, playable):
         self.name = name
         self.Limages = []
         self.Rimages = []
@@ -28,7 +28,7 @@ class Agent:
         self.rect.y = position[1]
         self.xvector = 0
         self.yvector = 0
-        self.personality = Personality(positivity)
+        self.personality = personality 
         self.targetx = self.rect.x
         self.targety = self.rect.y
         self.engaged = False
@@ -42,6 +42,8 @@ class Agent:
         self.buttons.append(self.positivity_button)
         self.buttons.append(self.mood_button)
         self.playable = playable
+        self.item_prox = False
+        self.inventory = []
 
     def get_mood(self):
         return self.personality.mood
@@ -65,13 +67,19 @@ class Agent:
     def item_proximity(self, items):
         for item in items:
             if (self.rect.x in range(item.rect.x - 101, item.rect.x + 101)) and (self.rect.y in range(item.rect.y - 20, item.rect.y + 20)):
+                self.item_prox = item
                 return item
+        return False
+
+    def agent_proximity(self, agent):
+        proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
+        if proximity:
+            return True
         return False
 
     def interact(self, agents):
         for agent in agents:
-            proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
-            if proximity and (self is not agent) and (self.xvector == 0):                 
+            if self.agent_proximity(agent) and (self is not agent) and (self.xvector == 0):                 
                 self.engaged = True
                 interaction = (self.personality.positivity + (self.personality.mood / 10) + agent.personality.positivity + (agent.personality.mood / 10))/2 > random.randint(1,20)
                 if (self.personality.update_mood(interaction, 5) is False) and (self.playable is False):
@@ -87,22 +95,29 @@ class Agent:
         if xy == 1:
             self.yvector = vector
 
-    def move(self):
+    def yboundaries(self):
+        if self.rect.y < FLOOR_HEIGHT:
+            self.yvector = 0
+            self.rect.y = 400
+        if self.rect.y > SCREEN_HEIGHT - 200:
+            self.yvector = 0
+            self.rect.y = SCREEN_HEIGHT - 200
+
+    def xboundaries(self):
+        if self.rect.x < 0:
+            self.xvector = 0 
+            self.rect.x = 0 
+        if self.rect.x > SCREEN_WIDTH - 100:
+            self.xvector = 0 
+            self.rect.x = SCREEN_WIDTH - 100 
+
+    def xmove(self):
         self.rect.x += self.xvector
+        self.xboundaries()
+
+    def ymove(self):
         self.rect.y += self.yvector
-        if self.leaving is False:
-            if self.rect.x < 0:
-                self.xvector = 0
-                self.rect.x = 0
-            if self.rect.x > SCREEN_WIDTH - 100:
-                self.xvector = 0
-                self.rect.x = SCREEN_WIDTH - 100
-            if self.rect.y < FLOOR_HEIGHT:
-                self.yvector = 0
-                self.rect.y = 400
-            if self.rect.y > SCREEN_HEIGHT - 200:
-                self.yvector = 0
-                self.rect.y = SCREEN_HEIGHT - 200
+        self.yboundaries()
 
     def update_button_colors(self):
         self.personality.mood_button.update_color(self.personality.mood) 
@@ -120,17 +135,20 @@ class NonPlayableAgent(Agent):
         yrand = random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)
         target_x = self.rect.x - xrand if self.facing_right else self.rect.x + xrand
         target_y = self.rect.y - yrand if self.rect.y > (FLOOR_HEIGHT + 50) else self.rect.y + yrand 
-        self.acquire_target(target_x, target_y)
+        self.acquire_targetx(target_x)
+        self.acquire_targety(target_y)
 
-    def acquire_target(self, target_x, target_y):
+    def acquire_targetx(self, target_x):
         self.targetx = target_x
-        self.targety = target_y
         if self.targetx > self.rect.x:
             self.change_vector(5, 0)
             self.change_side(True)
         if self.targetx < self.rect.x:
             self.change_vector(-5, 0)
             self.change_side(False)
+
+    def acquire_targety(self, target_y):
+        self.targety = target_y
         if self.targety > self.rect.y:
             self.change_vector(5, 1)
         if self.targety < self.rect.y:
@@ -148,8 +166,8 @@ class NonPlayableAgent(Agent):
 
     def leave(self):
          if self.get_mood() == 0:
-#        if self.personality.mood < ((self.personality.positivity * 10) / 2): 
-            self.acquire_target(-100 if self.facing_right else SCREEN_WIDTH + 100, self.rect.y)
+            self.change_vector(0, 1)
+            self.acquire_targetx(-100 if self.facing_right else SCREEN_WIDTH + 100)
             self.leaving = True
 
     def quit(self):
@@ -159,3 +177,10 @@ class NonPlayableAgent(Agent):
 class PlayableAgent(Agent):
     def __init__(self, name, LSprites, Lstand,  RSprites, Rstand, position, positivity, playable):
         super().__init__(name, LSprites, Lstand,  RSprites, Rstand, position, positivity, playable)
+
+    def take_item(self):
+        if self.item_prox is not False:
+            self.inventory.append(self.item_prox)
+            return self.item_prox
+            self.item_prox = False
+        return False

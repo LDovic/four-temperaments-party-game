@@ -2,6 +2,7 @@ import pygame
 import os
 from constants import *
 from agent import *
+from personality import *
 from button import Button
 from screen import * 
 from musicplayer import *
@@ -21,91 +22,71 @@ class Game:
 
         self.musicplayer = MusicPlayer()
 
-        self.tick = 0
         self.choose_character_tick = 0
         self.invitees = len(os.listdir(CHARACTERS)) - 1
         self.difficulty_level = 1
 
+        self.choose_difficulty_tick = 0
+        self.difficulty_level = 1
+
         self.create_screens()
-        self.create_meta_buttons()
-        self.create_options_buttons()
         self.create_character_profiles()
+        self.create_difficulty_profiles()
         self.attach_profile_audios()
         self.create_background()
         self.create_items()
 
-        """Loading buttons"""
-        self.loading_buttons = []
-        self.loading = Button("Loading", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.loading_buttons.append(self.loading)
-        self.loading_screen.position_buttons_vertical_center(self.loading_buttons)
-
-        """Display buttons"""
-        self.in_game_stats = []
-        self.mean = Button("", ((SCREEN_WIDTH / 3), 0), BLACK, BUTTON_FONT_SIZE)
-        self.sd = Button("", ((SCREEN_WIDTH / 3 ) * 2, 0), BLACK, BUTTON_FONT_SIZE)
-        self.in_game_stats.append(self.mean)
-        self.in_game_stats.append(self.sd)
-
-        """Win buttons"""
-        self.win_buttons = []
-        self.win = Button("Success", ((SCREEN_WIDTH / 3), 0), BLACK, BUTTON_FONT_SIZE)
-        self.win_buttons.append(self.win)
-        self.win_screen.position_buttons_horizontal(self.win_buttons, (SCREEN_HEIGHT / 4) * 3, 50)
-
-        """Lose buttons"""
-        self.lose_buttons = []
-        self.lose = Button("Game Over", ((SCREEN_WIDTH / 3), 0), BLACK, BUTTON_FONT_SIZE)
-        self.lose_buttons.append(self.lose)
-        self.lose_screen.position_buttons_horizontal(self.lose_buttons, (SCREEN_HEIGHT / 4) * 3, 50)
-
-        """Choose character buttons"""
-        self.choose_character_buttons = []
-        self.next = Button("Next", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.play = Button("Play", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.choose_character_buttons.append(self.next)
-        self.choose_character_buttons.append(self.play)
-        self.choose_character_screen.position_buttons_horizontal(self.choose_character_buttons, (SCREEN_HEIGHT / 4) * 3, 50)
-
-        """Instructions buttons"""
-        self.instructions_buttons = []
-        self.instructions_text1 = Button("Press E to interact", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text2 = Button("Press WASD to move", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text3 = Button("Press 1, 2 and 3 to control the music", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text4 = Button("Press 0 to see how everyone is feeling", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text5 = Button("If all of the guests leave, you lose!", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text6 = Button("Music will affect different personalities", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text7 = Button("For example, people who are introverted and negative will prefer metal", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text8 = Button("whereas people who are extroverted and positive like pop", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text9 = Button("See how long you can keep the party going", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_text10 = Button("Some guests don't mix well!", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.instructions_textplay = Button("Play", (0, 0), BLACK, BUTTON_FONT_SIZE) 
-        self.instructions_buttons.append(self.instructions_text1)
-        self.instructions_buttons.append(self.instructions_text2)
-        self.instructions_buttons.append(self.instructions_text3)
-        self.instructions_buttons.append(self.instructions_text4)
-        self.instructions_buttons.append(self.instructions_text5)
-        self.instructions_buttons.append(self.instructions_text6)
-        self.instructions_buttons.append(self.instructions_text7)
-        self.instructions_buttons.append(self.instructions_text8)
-        self.instructions_buttons.append(self.instructions_text9)
-        self.instructions_buttons.append(self.instructions_text10)
-        self.instructions_buttons.append(self.instructions_textplay)
-
     """RUN - Always running"""
+
+    def set_screens(self, new_screen):
+        self.back_screen = self.this_screen
+        for screen in self.screens:
+            if screen is not new_screen:
+                screen.on = False
+        new_screen.on = True
+        self.this_screen = new_screen
+
+    def mingle(self):    
+        for agent in self.nonplayable_agents:
+            if agent.quitting is True:
+                self.nonplayable_agents.remove(agent)
+            if agent.leaving is True:
+                agent.quit()
+            else:
+                agent.leave()
+                if (agent.feels_extroverted() is True):
+                    target = random.choice(self.nonplayable_agents)
+                    agent.acquire_targetx(target.rect.x) 
+                    agent.acquire_targety(target.rect.y) 
+                agent.interact(self.nonplayable_agents)
+            agent.stop()
+        for agent in self.nonplayable_agents + self.playable_agents:
+            agent.personality.circadian_rhythm()
+            if agent.personality.circadian_rhythm_live():
+                if self.musicplayer.get_genre() is False:
+                    agent.personality.return_to_base_mood()
+                    agent.personality.reset_rhythm()
+                else:
+                    agent.music(self.musicplayer.get_genre())
+                    agent.personality.reset_rhythm()
+            agent.xmove()
+            agent.ymove()
 
     def run(self):
         self.this_screen.fill()
         if self.this_screen.name == "Start":
-            self.this_screen.blit_buttons(self.meta_buttons)
+            self.this_screen.blit_buttons(self.this_screen.start_buttons)
+
         elif self.this_screen.name == "Loading":
-            self.this_screen.blit_buttons(self.loading_buttons)
+            self.this_screen.blit_buttons(self.this_screen.loading_buttons)
             self.create_agents() 
+            self.set_screens(self.game_screen)
+
         elif self.this_screen.name == "Game":
             for asset in self.background:
                 self.this_screen.display.blit(asset.image, asset.rect)
 
-            self.this_screen.blit_buttons(self.in_game_stats + self.musicplayer.musicplayer_secondary_buttons)
+            self.this_screen.blit_buttons(self.musicplayer.musicplayer_secondary_buttons)
 
             for item in self.items:
                 self.this_screen.update_items(item)
@@ -113,14 +94,24 @@ class Game:
             self.this_screen.update_track(self.musicplayer)
             self.musicplayer.has_stopped()
 
-            self.total_agents.sort(key=lambda x: x.rect.y, reverse=False)
+            total_agents = self.playable_agents + self.nonplayable_agents
+
+            total_agents.sort(key=lambda x: x.rect.y, reverse=False)
 
             for agent in self.playable_agents:
                 item = agent.item_proximity(self.items)
                 if item is not False:
-                    self.this_screen.display.blit(item.button.surface, item.button.rect)      
+                    self.this_screen.display.blit(item.take.surface, item.take.rect)
+                else:
+                    agent.item_prox = False
 
-            for agent in self.total_agents:
+            for player in self.playable_agents:
+                for agent in self.nonplayable_agents:
+                    if (player.agent_proximity(agent)) and player.inventory:
+                        self.this_screen.update_item_info(player.inventory[0], player)
+                        self.this_screen.display.blit(player.inventory[0].give.surface, player.inventory[0].give.rect)
+
+            for agent in total_agents:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
@@ -128,19 +119,27 @@ class Game:
             self.mingle()
  
             self.is_game_over()
+
         elif self.this_screen.name == "Instructions":
-            self.this_screen.position_buttons_vertical_center(self.instructions_buttons)
-            self.this_screen.blit_buttons(self.instructions_buttons)
-        elif self.this_screen.name == "Options":
-            self.this_screen.position_buttons_vertical_center(self.options_buttons)
-            self.this_screen.blit_buttons(self.options_buttons)
+            self.this_screen.position_buttons_vertical_center(self.this_screen.instructions_buttons)
+            self.this_screen.blit_buttons(self.this_screen.instructions_buttons)
+
         elif self.this_screen.name == "Win":
-            self.this_screen.blit_buttons(self.win_buttons)
+            self.this_screen.blit_buttons(self.this_screen.win_buttons)
+
         elif self.this_screen.name == "Lose":
-            self.this_screen.blit_buttons(self.lose_buttons)
+            self.this_screen.blit_buttons(self.this_screen.lose_buttons)
+
         elif self.this_screen.name == "ChooseCharacter":
-            self.this_screen.blit_buttons(self.choose_character_buttons)
+            self.this_screen.blit_buttons(self.this_screen.choose_character_buttons)
             self.this_screen.show(self.character_profiles)
+
+        elif self.this_screen.name == "ChooseDifficulty":
+            self.this_screen.blit_buttons(self.this_screen.choose_difficulty_buttons)
+            self.this_screen.show(self.difficulty_profiles)
+
+        elif self.this_screen.name == "Introduction":
+            self.this_screen.display.blit(self.this_screen.images[self.this_screen.get_index()], self.this_screen.images[self.this_screen.get_index()].get_rect())
 
     """LOAD GAME DATA"""
 
@@ -150,38 +149,37 @@ class Game:
         self.win_screen = WinScreen("Win", False, self.display)
         self.lose_screen = LoseScreen("Lose", False, self.display)
         self.game_screen = GameScreen("Game", False, self.display)
-        self.options_screen = OptionsScreen("Options", False, self.display)
         self.start_screen = StartScreen("Start", True, self.display) 
-        self.back_screen = self.start_screen
-        self.this_screen = self.start_screen
+        self.choose_difficulty_screen = ChooseDifficultyScreen("ChooseDifficulty", False, self.display)
         self.instructions_screen = InstructionsScreen("Instructions", False, self.display)
+        self.introduction_screen = IntroductionScreen("Introduction", False, self.display)
+
+        self.back_screen = self.introduction_screen
+        self.this_screen = self.introduction_screen
 
         self.screens = []
+
         self.screens.append(self.choose_character_screen)
         self.screens.append(self.loading_screen)
         self.screens.append(self.win_screen)
+        self.screens.append(self.lose_screen)
         self.screens.append(self.game_screen) 
-        self.screens.append(self.options_screen) 
         self.screens.append(self.start_screen) 
+        self.screens.append(self.choose_difficulty_screen)
+        self.screens.append(self.instructions_screen)
+        self.screens.append(self.introduction_screen)
 
-    def create_meta_buttons(self):
-        self.meta_buttons = []
-        self.quit = Button("Quit", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.new_game = Button("New Game", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.options = Button("Options", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.meta_buttons.append(self.new_game)
-        self.meta_buttons.append(self.options)
-        self.meta_buttons.append(self.quit)
-        self.start_screen.position_buttons_vertical_center(self.meta_buttons)
-
-    def create_options_buttons(self):
-        self.options_buttons = []
-        self.guests = Button("Guests: " + str(self.invitees), (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.difficulty = Button("Difficulty: " + str(self.difficulty_level), (0, 0), BLACK, BUTTON_FONT_SIZE)         
-        self.close = Button("Close", (0, 0), BLACK, BUTTON_FONT_SIZE)
-        self.options_buttons.append(self.guests)
-        self.options_buttons.append(self.difficulty)
-        self.options_buttons.append(self.close)
+    def create_difficulty_profiles(self):
+        self.difficulty_profiles = {}
+        contents = os.listdir(DIFFICULTY)
+        for item in contents:
+            if os.path.isdir(DIFFICULTY + item):
+                self.choose_difficulty_tick += 1
+                self.difficulty_profiles[item] = {}
+                self.difficulty_profiles[item]['name'] = item
+                self.difficulty_profiles[item]['profile'] = pygame.image.load(os.path.join(DIFFICULTY + item + "/" + item) + ASSET_FILE_TYPE).convert_alpha()
+                self.difficulty_profiles[item]['display'] = False
+                self.difficulty_profiles[item]['selected'] = False
 
     def attach_profile_audios(self):
         contents = os.listdir(CHARACTER_AUDIO)
@@ -208,6 +206,8 @@ class Game:
                 self.character_profiles[item]['selected'] = False 
 
     def create_agents(self):
+        personality = PersonalityFactory()        
+
         self.nonplayable_agents = []
         self.playable_agents = []
         x = 0
@@ -220,12 +220,12 @@ class Game:
                         self.nonplayable_agents.append(
                             NonPlayableAgent(
                             item,
+                            personality.factory(),
                             item + 'Left',
                             item + 'LeftStand',
                             item + 'Right',
                             item + 'RightStand',
                             (random.randint(0, SCREEN_WIDTH), random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)),
-                            self.difficulty_level,
                             False
                             )
                         )
@@ -233,20 +233,18 @@ class Game:
                         self.playable_agents.append(
                             PlayableAgent(
                             item,
+                            personality.factory(),
                             item + 'Left',
                             item + 'LeftStand',
                             item + 'Right',
                             item + 'RightStand',
                             (random.randint(0, SCREEN_WIDTH), 0),
-                            self.difficulty_level,
                             True
                             )
                         )
             x += 1 
-
+        self.nonplayable_agents_starting_total = len(self.nonplayable_agents)
         self.player1 = self.playable_agents[0]
-        self.total_agents = self.nonplayable_agents + self.playable_agents
-        self.set_screens(self.game_screen)
 
     def create_background(self):
         self.background = []
@@ -258,15 +256,16 @@ class Game:
     def create_items(self):
         self.items = []
         contents = os.listdir(ITEMS)
+        factory = ItemFactory()
         for item in contents:
-            if ASSET_FILE_TYPE in item:
-                self.items.append(Item(item, (400, 390)))
+            if os.path.isdir(ITEMS + item): 
+                self.items.append(ItemFactory.factory(item))
 
     """CONTROLS"""
 
     def key_up(self, key):
         if key == pygame.K_0:
-            for agent in self.total_agents:
+            for agent in self.nonplayable_agents:
                 agent.personality.display_info = False
         if key == pygame.K_a or key == pygame.K_d:
             self.player1.change_vector(0, 0)
@@ -283,7 +282,7 @@ class Game:
             if key == pygame.K_3:
                 self.musicplayer.stop()
         if key == pygame.K_0:
-            for agent in self.total_agents:
+            for agent in self.nonplayable_agents:
                 agent.personality.display_info = True
         if key == pygame.K_e:
             self.player1.interact(self.nonplayable_agents)
@@ -294,37 +293,47 @@ class Game:
         if key == pygame.K_a:
             self.player1.change_vector(-5, 0)
             self.player1.change_side(False)
+        if key == pygame.K_f:
+            if not self.player1.inventory:
+                taken = self.player1.take_item()
+                if taken is not False:
+                    self.items.remove(taken)
+            else:
+                for agent in self.nonplayable_agents:
+                    if self.player1.agent_proximity(agent):
+                        self.player1.inventory[0].apply_item(agent)
+                        self.player1.inventory.clear()                          
         elif key == pygame.K_d:
             self.player1.change_vector(5, 0)
             self.player1.change_side(True)
 
     def mouse_button_down(self, pos):
-        if self.this_screen.name == "Options":
-            if self.close.rect.collidepoint(pos):
-                self.set_screens(self.back_screen)
-            if self.guests.rect.collidepoint(pos):
-                self.add_guests()
-            if self.difficulty.rect.collidepoint(pos):
-                self.increase_difficulty()
-        elif self.this_screen.name == "Start":
-            if self.options.rect.collidepoint(pos):
-                self.set_screens(self.options_screen)
-
-            if self.quit.rect.collidepoint(pos):
+        if self.this_screen.name == "Start":
+            if self.this_screen.quit.rect.collidepoint(pos):
                 return True
-            if self.new_game.rect.collidepoint(pos):                
+            if self.this_screen.new_game.rect.collidepoint(pos):                
                 self.set_screens(self.choose_character_screen)
                 self.choose_character()
 
         elif self.this_screen.name == "ChooseCharacter":
-            if self.next.rect.collidepoint(pos):
+            if self.this_screen.choose_character_next.rect.collidepoint(pos):
                 self.choose_character()
-            if self.play.rect.collidepoint(pos):
+            if self.this_screen.choose_character_play.rect.collidepoint(pos):
+                self.set_screens(self.choose_difficulty_screen)
+                self.choose_difficulty()
+
+        elif self.this_screen.name == "ChooseDifficulty":
+            if self.this_screen.choose_difficulty_next.rect.collidepoint(pos):
+                self.choose_difficulty()
+            if self.this_screen.choose_difficulty_play.rect.collidepoint(pos):
+                for name, difficulty in self.difficulty_profiles.items():
+                    if difficulty['selected'] is True:
+                        self.difficulty_level = name
                 self.set_screens(self.instructions_screen)
 
         elif self.this_screen.name == "Instructions":
-            if self.instructions_textplay.rect.collidepoint(pos):
-                self.play_game()
+            if self.this_screen.instructions_textplay.rect.collidepoint(pos):
+                self.set_screens(self.loading_screen)
 
         elif self.this_screen.name == "Game":
             if self.musicplayer.next_track_button.rect.collidepoint(pos):
@@ -335,6 +344,12 @@ class Game:
             else:
                 if self.musicplayer.stop_button.rect.collidepoint(pos):
                     self.musicplayer.stop()
+
+        elif self.this_screen.name == "Introduction":
+            if self.this_screen.index >= len(self.this_screen.images) - 1:
+                self.set_screens(self.start_screen)
+            else:
+                self.this_screen.index += 1
 
     def event_listen(self):
         pos = pygame.mouse.get_pos()
@@ -350,39 +365,26 @@ class Game:
                 if event.type == pygame.KEYUP:
                     self.key_up(event.key)
 
-    """OTHER"""
+    """GAME LOGIC"""
 
-    def set_screens(self, new_screen):
-        self.back_screen = self.this_screen
-        for screen in self.screens:
-            if screen is not new_screen:
-                screen.on = False
-        new_screen.on = True
-        self.this_screen = new_screen
+    def choose_difficulty(self):
+        tick = 0
+ 
+        end_of_loop = self.choose_difficulty_tick == len(self.difficulty_profiles)
 
-    def mingle(self):                
-        for agent in self.nonplayable_agents:
-            if agent.quitting is True:
-                self.nonplayable_agents.remove(agent)
-            if agent.leaving is True:
-                agent.quit()
-            else:
-                agent.leave()
-                if (agent.feels_extroverted() is True):
-                    target = random.choice(self.nonplayable_agents)
-                    agent.acquire_target(target.rect.x, target.rect.y) 
-                agent.interact(self.nonplayable_agents)
-            agent.stop()
-        for agent in self.nonplayable_agents + self.playable_agents:
-            agent.personality.circadian_rhythm()
-            if agent.personality.circadian_rhythm_live():
-                if self.musicplayer.get_genre() is False:
-                    agent.personality.return_to_base_mood()
-                    agent.personality.reset_rhythm()
-                else:
-                    agent.music(self.musicplayer.get_genre())
-                    agent.personality.reset_rhythm()
-            agent.move()
+        if end_of_loop:
+            self.choose_difficulty_tick = 0
+
+        for name, difficulty in self.difficulty_profiles.items():
+            if tick == (self.choose_difficulty_tick - 1) or end_of_loop:
+                difficulty['display'] = False
+                difficulty['selected'] = False
+            if tick == self.choose_difficulty_tick:
+                difficulty['display'] = True
+                difficulty['selected'] = True
+            tick += 1
+
+        self.choose_difficulty_tick += 1 
 
     def play_character_audio(self):
         try:
@@ -412,53 +414,18 @@ class Game:
         self.play_character_audio()
         self.choose_character_tick += 1
 
-    def play_game(self): 
-        self.set_screens(self.loading_screen)
-
-    def increase_difficulty(self):
-        self.difficulty_level += 1
-        if self.difficulty_level > 9:
-            self.difficulty_level = 1 
-        self.update_options(self.difficulty, "Difficulty: ", self.difficulty_level)
-
-    def add_guests(self):
-        self.invitees += 1
-        if self.invitees >= len(os.listdir(CHARACTERS)):
-            self.invitees = 1
-        self.update_options(self.guests, "Guests: ", self.invitees)
-
-    def update_options(self,option, string, count):
-        option.change_text(string + str(count))
-
-    def calculate_mean(self):
-        total_agents = self.nonplayable_agents
-
-        if len(total_agents) == 0:
-            return 0
-
-        mean = 0
-        for agent in total_agents:
-            mean += agent.get_mood()
-        return mean / len(total_agents)
-
-    def calculate_sd(self):
-        total_agents = self.nonplayable_agents
-
-        if len(total_agents) == 0:
-            return 0
-
-        mean = self.calculate_mean()
-        squares = []
-        for agent in total_agents:
-            squares.append(pow(agent.get_mood() - mean, 2))
-        sd1 = sum(squares) - 1 / len(total_agents)
-        sd = math.sqrt(sd1) if sd1 > 0 else 0
-        return sd
-
     def calculate_win(self):
         if (self.calculate_mean() > 95) and (self.calculate_sd() < 30):
             self.set_screens(self.win_screen)
 
+    def get_difficulty(self):
+        if self.difficulty_level == 'Hard':
+            return self.nonplayable_agents_starting_total
+        if self.difficulty_level == 'Easy':
+            return 2
+
     def is_game_over(self):
-        if not self.nonplayable_agents:
+        print(self.nonplayable_agents_starting_total)
+        print(self.get_difficulty())
+        if len(self.nonplayable_agents) < self.get_difficulty():
             self.set_screens(self.lose_screen)

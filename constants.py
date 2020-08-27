@@ -30,6 +30,8 @@ ITEMS = CWD + "/items/"
 CHARACTER_AUDIO = CWD + "/audio/CharacterAudio/"
 SOUNDTRACK = CWD + "/audio/MusicPlayer/"
 FONTS = CWD + "/fonts/"
+DIFFICULTY = CWD + "/difficulty/"
+INTRODUCTION = CWD + "/introduction/"
 
 """
 AUDIO
@@ -57,3 +59,9 @@ FLOOR_HEIGHT = 400
 BUTTON_FONT_SIZE = 12
 
 Y_BOTTOM_Q = (SCREEN_HEIGHT / 4) * 3
+
+"""
+GAME STATS
+"""
+
+NUMBER_OF_PLAYERS = len(os.listdir(CHARACTERS))

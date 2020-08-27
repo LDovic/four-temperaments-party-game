@@ -1,11 +1,38 @@
 import pygame
 import random
 
+class PersonalityFactory():
+    def calculate_temperament(self):
+        extroversion = random.randint(1,10)
+        positivity = random.randint(1,10)
+        if extroversion >= 5:
+            temperament = "Sanguine"
+            if positivity <= 5:
+                temperament = "Choleric"
+        else:
+            temperament = "Phlegmatic"
+            if positivity <= 5:
+                temperament = "Melancholic"
+        return temperament, extroversion, positivity
+
+    def factory(self):
+        temperament, extroversion, positivity = self.calculate_temperament()
+        if temperament == 'Sanguine':
+            return Sanguine(temperament, extroversion, positivity)
+        elif temperament == 'Choleric':
+            return Choleric(temperament, extroversion, positivity)
+        elif temperament == 'Phlegmatic':
+            return Phlegmatic(temperament, extroversion, positivity)
+        elif temperament == 'Melancholic':
+            return Melancholic(temperament, extroversion, positivity)
+        else:
+            raise ValueError(temperament)
+
 class Personality:
-    def __init__(self, positivity):
-        self.extroversion = random.randint(1,10)
-        self.positivity = random.randint(1, 10 - positivity)
-        self.temperament = self.calculate_temperament()
+    def __init__(self, temperament, extroversion, positivity):
+        self.temperament = temperament
+        self.extroversion = extroversion
+        self.positivity = positivity
         self.base_mood = self.positivity * 10
         self.mood = self.base_mood
         self.circadian_rhythm_on = False
@@ -74,7 +101,28 @@ class Personality:
         if (self.temperament == "Melancholic") or (self.temperament == "Choleric"):
             self.update_mood(True, 10)
         if (self.temperament == "Sanguine") or (self.temperament == "Phlegmatic"):
-            self.update_mood(False, 10)
+            self.update_mood(False, 15)
 
     def no_music(self):
         pass
+
+    def get_drunk(self, strength):
+        for x in range(0, strength):
+            if self.extroversion < 10:
+                self.extroversion += 1
+
+class Sanguine(Personality):
+    def __init__(self, temperament, extroversion, positivity):
+        super().__init__(temperament, extroversion, positivity)
+
+class Choleric(Personality):
+    def __init__(self, temperament, extroversion, positivity):
+        super().__init__(temperament, extroversion, positivity)
+
+class Phlegmatic(Personality):
+    def __init__(self, temperament, extroversion, positivity):
+        super().__init__(temperament, extroversion, positivity)
+
+class Melancholic(Personality):
+    def __init__(self, temperament, extroversion, positivity):
+        super().__init__(temperament, extroversion, positivity)
