@@ -11,11 +11,17 @@ from item import *
 import math
 import random
 import simpleaudio as audio
+import datetime
 
 class Game:
     def __init__(self):
         pygame.init()
         self.clock = pygame.time.Clock()
+
+        self.pause = False
+
+        self.timer_on = False
+        self.time_elapsed = 0
 
         self.display = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption("L Noble Project")
@@ -54,10 +60,12 @@ class Game:
                 agent.quit()
             else:
                 agent.leave()
-                if (agent.feels_extroverted() is True):
+                if (agent.feels_extroverted() is True) and agent.engaged is False:
                     target = random.choice(self.nonplayable_agents)
                     agent.acquire_targetx(target.rect.x) 
                     agent.acquire_targety(target.rect.y) 
+                agent.update_circle(self.nonplayable_agents)
+                agent.agent_proximity()
                 agent.interact(self.nonplayable_agents)
             agent.stop()
         for agent in self.nonplayable_agents + self.playable_agents:
@@ -67,7 +75,7 @@ class Game:
                     agent.personality.return_to_base_mood()
                     agent.personality.reset_rhythm()
                 else:
-                    agent.music(self.musicplayer.get_genre())
+                    agent.personality.music(self.musicplayer.get_genre())
                     agent.personality.reset_rhythm()
             agent.xmove()
             agent.ymove()
@@ -80,9 +88,12 @@ class Game:
         elif self.this_screen.name == "Loading":
             self.this_screen.blit_buttons(self.this_screen.loading_buttons)
             self.create_agents() 
-            self.set_screens(self.game_screen)
+            self.set_screens(self.instructions_screen)
 
         elif self.this_screen.name == "Game":
+            if self.timer_on == False:
+                self.start_timer()
+
             for asset in self.background:
                 self.this_screen.display.blit(asset.image, asset.rect)
 
@@ -105,22 +116,30 @@ class Game:
                 else:
                     agent.item_prox = False
 
-            for player in self.playable_agents:
+            if self.player1.inventory:
                 for agent in self.nonplayable_agents:
-                    if (player.agent_proximity(agent)) and player.inventory:
+                    if agent in self.player1.circle:
                         self.this_screen.update_item_info(player.inventory[0], player)
-                        self.this_screen.display.blit(player.inventory[0].give.surface, player.inventory[0].give.rect)
+                        self.this_screen.display.blit(player.inventory[0].give.surface, player.inventory[0].give.rect)                    
 
             for agent in total_agents:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)
-            self.mingle()
+            
+            self.this_screen.display.blit(self.this_screen.timer.surface, self.this_screen.timer.rect)
  
-            self.is_game_over()
-
+            if self.pause == False:
+                self.mingle() 
+                self.update_timer()
+                self.this_screen.update_timer_info(self.convert(self.time_elapsed))
+                self.calculate_win()
+                self.is_game_over()
+            else:
+                self.set_screens(self.instructions_screen)
         elif self.this_screen.name == "Instructions":
+            self.pause = True
             self.this_screen.position_buttons_vertical_center(self.this_screen.instructions_buttons)
             self.this_screen.blit_buttons(self.this_screen.instructions_buttons)
 
@@ -273,39 +292,45 @@ class Game:
             self.player1.change_vector(0, 1)
 
     def key_down(self, key):
-        if key == pygame.K_2:
-                self.musicplayer.change_track()
-        if self.musicplayer.now_playing is False:
-                if key == pygame.K_1:
-                    self.musicplayer.play()
-        else:
-            if key == pygame.K_3:
-                self.musicplayer.stop()
-        if key == pygame.K_0:
-            for agent in self.nonplayable_agents:
-                agent.personality.display_info = True
-        if key == pygame.K_e:
-            self.player1.interact(self.nonplayable_agents)
-        if key == pygame.K_w:
-            self.player1.change_vector(-5, 1)
-        if key == pygame.K_s:
-            self.player1.change_vector(5, 1)
-        if key == pygame.K_a:
-            self.player1.change_vector(-5, 0)
-            self.player1.change_side(False)
-        if key == pygame.K_f:
-            if not self.player1.inventory:
-                taken = self.player1.take_item()
-                if taken is not False:
-                    self.items.remove(taken)
+        if self.this_screen.name == "Game":
+            if self.musicplayer.now_playing is False:
+                    if key == pygame.K_1:
+                        self.musicplayer.play()
             else:
+                if key == pygame.K_3:
+                    self.musicplayer.stop()
+            if key == pygame.K_2:
+                    self.musicplayer.change_track()
+            elif key == pygame.K_0:
                 for agent in self.nonplayable_agents:
-                    if self.player1.agent_proximity(agent):
-                        self.player1.inventory[0].apply_item(agent)
+                    agent.personality.display_info = True
+            elif key == pygame.K_e:
+                self.player1.interact(self.nonplayable_agents)
+            elif key == pygame.K_w:
+                self.player1.change_vector(-5, 1)
+            elif key == pygame.K_s:
+                self.player1.change_vector(5, 1)
+            elif key == pygame.K_a:
+                self.player1.change_vector(-5, 0)
+                self.player1.change_side(False)
+            elif key == pygame.K_f:
+                if not self.player1.inventory:
+                    taken = self.player1.take_item()
+                    if taken is not False:
+                        self.items.remove(taken)
+                else:
+                    if self.player1.circle:
+                        self.player1.apply_item(self.player1.circle[0])
                         self.player1.inventory.clear()                          
-        elif key == pygame.K_d:
-            self.player1.change_vector(5, 0)
-            self.player1.change_side(True)
+            elif key == pygame.K_d:
+                self.player1.change_vector(5, 0)
+                self.player1.change_side(True)
+            elif key == pygame.K_SPACE:
+                self.set_screens(self.instructions_screen)
+        elif self.this_screen.name == "Instructions":
+            if key == pygame.K_SPACE:
+                self.pause = False
+                self.set_screens(self.game_screen) 
 
     def mouse_button_down(self, pos):
         if self.this_screen.name == "Start":
@@ -329,12 +354,8 @@ class Game:
                 for name, difficulty in self.difficulty_profiles.items():
                     if difficulty['selected'] is True:
                         self.difficulty_level = name
-                self.set_screens(self.instructions_screen)
-
-        elif self.this_screen.name == "Instructions":
-            if self.this_screen.instructions_textplay.rect.collidepoint(pos):
                 self.set_screens(self.loading_screen)
-
+      
         elif self.this_screen.name == "Game":
             if self.musicplayer.next_track_button.rect.collidepoint(pos):
                 self.musicplayer.change_track()
@@ -358,12 +379,11 @@ class Game:
                 return True
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.mouse_button_down(pos) is True:
-                    return True
-            if self.this_screen.name == "Game":
-                if event.type == pygame.KEYDOWN:
-                    self.key_down(event.key)
-                if event.type == pygame.KEYUP:
-                    self.key_up(event.key)
+                    return True                
+            if event.type == pygame.KEYDOWN:
+                self.key_down(event.key)
+            if event.type == pygame.KEYUP:
+                self.key_up(event.key)
 
     """GAME LOGIC"""
 
@@ -414,8 +434,25 @@ class Game:
         self.play_character_audio()
         self.choose_character_tick += 1
 
+    def convert(self, milliseconds): 
+        seconds = milliseconds/1000
+        seconds = seconds % (24 * 3600) 
+        seconds %= 3600
+        minutes = 9 - seconds // 60
+        seconds = 60 - seconds%60
+      
+        return "%02d:%02d" % (minutes, seconds) 
+
+    def start_timer(self):
+        self.timer_on = True
+        self.timer = pygame.time.Clock()
+
+    def update_timer(self):
+        self.timer.tick(FRAMERATE)
+
     def calculate_win(self):
-        if (self.calculate_mean() > 95) and (self.calculate_sd() < 30):
+        self.time_elapsed += self.timer.get_rawtime()
+        if self.time_elapsed/1000 > 600:
             self.set_screens(self.win_screen)
 
     def get_difficulty(self):
@@ -425,7 +462,5 @@ class Game:
             return 2
 
     def is_game_over(self):
-        print(self.nonplayable_agents_starting_total)
-        print(self.get_difficulty())
         if len(self.nonplayable_agents) < self.get_difficulty():
             self.set_screens(self.lose_screen)

@@ -53,6 +53,10 @@ class GameScreen(Screen):
     def __init__(self, name, on, display):
         super().__init__(name, on, display)
         self.tick = 0
+        self.timer = Button("", ((SCREEN_WIDTH/4)*3, 0), GREY, 24)
+
+    def update_timer_info(self, time):
+        self.timer.change_text(time)
 
     def update_items(self, item):
         self.display.blit(item.image, item.rect)
@@ -150,7 +154,7 @@ class InstructionsScreen(Screen):
         self.instructions_text8 = Button("whereas people who are extroverted and positive like pop", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_text9 = Button("See how long you can keep the party going", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_text10 = Button("Some guests don't mix well!", (0, 0), WHITE, BUTTON_FONT_SIZE)
-        self.instructions_textplay = Button("Play", (0, 0), WHITE, BUTTON_FONT_SIZE)
+        self.instructions_play = Button("Press space to play", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_buttons.append(self.instructions_text1)
         self.instructions_buttons.append(self.instructions_text2)
         self.instructions_buttons.append(self.instructions_text3)
@@ -161,7 +165,7 @@ class InstructionsScreen(Screen):
         self.instructions_buttons.append(self.instructions_text8)
         self.instructions_buttons.append(self.instructions_text9)
         self.instructions_buttons.append(self.instructions_text10)
-        self.instructions_buttons.append(self.instructions_textplay)
+        self.instructions_buttons.append(self.instructions_play)
 
 
 class ChooseDifficultyScreen(Screen):
@@ -195,8 +199,6 @@ class IntroductionScreen(Screen):
                 image = pygame.image.load(path).convert_alpha()
                 items.append(image)
         return items
-
-    
 
     def get_index(self):
         return self.index

@@ -1,5 +1,6 @@
 import pygame
 from game import Game
+from constants import *
 
 game = Game()
 
@@ -12,7 +13,7 @@ def main():
         game.run()
 
         pygame.display.flip()
-        game.clock.tick(40)
+        game.clock.tick(FRAMERATE)
 
 main()
 pygame.quit()

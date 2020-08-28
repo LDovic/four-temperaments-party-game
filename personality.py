@@ -71,7 +71,7 @@ class Personality:
 
     def update_mood(self, positive, score):
         if not positive:
-            for x in range(0, score):
+            for point in range(0, score):
                if self.mood > 0:
                    self.mood -= 1
             return False
@@ -79,29 +79,16 @@ class Personality:
             if self.mood < 100:
                 self.mood += 1
 
-    def classical(self):
-        if (self.temperament == "Phlegmatic") or (self.temperament == "Melancholic"):
-            self.update_mood(True, 10)
-        if (self.temperament == "Sanguine") or (self.temperament == "Choleric"):
-            self.update_mood(False, 10)
-
-    def pop(self):
-        if (self.temperament == "Sanguine") or (self.temperament == "Phlegmatic"):
-            self.update_mood(True, 10)
-        if (self.temperament == "Melancholic") or (self.temperament == "Choleric"):
-            self.update_mood(False, 10)
-
-    def hiphop(self):
-        if (self.temperament == "Sanguine") or (self.temperament == "Choleric"):
-            self.update_mood(True, 10)
-        if (self.temperament == "Melancholic") or (self.temperament == "Phlegmatic"):
-            self.update_mood(False, 10)
-
-    def metal(self):
-        if (self.temperament == "Melancholic") or (self.temperament == "Choleric"):
-            self.update_mood(True, 10)
-        if (self.temperament == "Sanguine") or (self.temperament == "Phlegmatic"):
-            self.update_mood(False, 15)
+    def music(self, genre):
+        switcher = { 
+            "Metal": self.metal,
+            "Hip Hop": self.hiphop, 
+            "Pop": self.pop,
+            "Classical": self.classical
+        }   
+        mood = switcher.get(genre, False)[0]
+        value = switcher.get(genre, False)[1]
+        self.update_mood(mood, value)
 
     def no_music(self):
         pass
@@ -111,18 +98,39 @@ class Personality:
             if self.extroversion < 10:
                 self.extroversion += 1
 
+    def get_messed_up(self):
+        for x in range(0, random.randint(0, 10)):
+            if self.positivity < 10:
+                self.positivity += 1
+
 class Sanguine(Personality):
     def __init__(self, temperament, extroversion, positivity):
         super().__init__(temperament, extroversion, positivity)
+        self.metal = (False, 10)
+        self.hiphop = (True, 5)
+        self.pop = (True, 10)
+        self.classical = (False, 5)
 
 class Choleric(Personality):
     def __init__(self, temperament, extroversion, positivity):
         super().__init__(temperament, extroversion, positivity)
+        self.metal = (True, 5)
+        self.hiphop = (True, 10)
+        self.pop = (False, 5)
+        self.classical = (False, 10)
 
 class Phlegmatic(Personality):
     def __init__(self, temperament, extroversion, positivity):
         super().__init__(temperament, extroversion, positivity)
+        self.metal = (False, 5)
+        self.hiphop = (False, 10)
+        self.pop = (True, 5)
+        self.classical = (True, 10)
 
 class Melancholic(Personality):
     def __init__(self, temperament, extroversion, positivity):
-        super().__init__(temperament, extroversion, positivity)
+       super().__init__(temperament, extroversion, positivity)
+       self.metal = (True, 10)
+       self.hiphop = (False, 10)
+       self.pop = (False, 10)
+       self.classical = (True, 5)

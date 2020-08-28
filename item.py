@@ -9,6 +9,8 @@ class ItemFactory():
             return WhiskeyBottle(name)
         elif name == 'RedStripe':
             return RedStripe(name)
+        elif name == 'MysteriousWhitePowder':
+            return MysteriousWhitePowder(name)
         else:
             raise ValueError(name)
 
@@ -28,7 +30,7 @@ class WhiskeyBottle(Item):
         self.give = Button("Give whiskey (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
 
     def apply_item(self, agent):
-        agent.personality.get_drunk(3)
+        agent.personality.get_drunk(4)
 
 class RedStripe(Item):
     def __init__(self, name):
@@ -40,3 +42,14 @@ class RedStripe(Item):
 
     def apply_item(self, agent):
         agent.personality.get_drunk(2)
+
+class MysteriousWhitePowder(Item):
+    def __init__(self, name):
+        super().__init__(name)
+        self.rect.x = 1200
+        self.rect.y = 390
+        self.take = Button("Take mysterious white powder (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
+        self.give = Button("Give mysterious white powder (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
+
+    def apply_item(self, agent):
+        agent.personality.get_messed_up()        

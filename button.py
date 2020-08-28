@@ -11,6 +11,7 @@ class Button:
       self.rect.y = position[1]
       self.x = position[0]
       self.y = position[1]
+      self.color = color
 
     def get_font(self, size):
         try:
@@ -21,7 +22,7 @@ class Button:
         return font
 
     def change_text(self, text):  
-        self.surface, self.rect = self.font.render(text)
+        self.surface, self.rect = self.font.render(text, self.color)
         self.rect.x = self.x
         self.rect.y = self.y
         self.text = text

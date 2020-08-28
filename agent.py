@@ -44,6 +44,7 @@ class Agent:
         self.playable = playable
         self.item_prox = False
         self.inventory = []
+        self.circle = []
 
     def get_mood(self):
         return self.personality.mood
@@ -54,16 +55,6 @@ class Agent:
     def get_positivity(self):
         return self.personality.positivity
 
-    def music(self, genre):
-        switcher = {
-            "Metal": self.personality.metal,
-            "Hip Hop": self.personality.hiphop,
-            "Pop": self.personality.pop,
-            "Classical": self.personality.classical
-        }
-        switch_genre = switcher.get(genre, False) 
-        switch_genre() if switch_genre else self.no_music()
-
     def item_proximity(self, items):
         for item in items:
             if (self.rect.x in range(item.rect.x - 101, item.rect.x + 101)) and (self.rect.y in range(item.rect.y - 20, item.rect.y + 20)):
@@ -71,20 +62,35 @@ class Agent:
                 return item
         return False
 
-    def agent_proximity(self, agent):
-        proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
-        if proximity:
-            return True
-        return False
+    def agent_proximity(self):
+        self.circle.sort(key=lambda agent: agent.rect.x, reverse=False)     
+
+    def update_circle(self, agents):
+        for agent in agents:
+            proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
+            if (agent not in self.circle) and proximity and (self is not agent):
+                self.circle.append(agent)
+            elif agent in self.circle and not proximity:
+                self.circle.remove(agent)
+
+    def debug(self, agents):
+        print("!*******************!")
+        print("OWNER: " + self.name)
+        for agent in self.circle:
+            print(agent.name)
+
+    def calculate_interaction(self, agent):
+        return (self.personality.positivity + (self.personality.mood / 20) + agent.personality.positivity + (agent.personality.mood / 20))/2 > random.randint(1,20)
 
     def interact(self, agents):
-        for agent in agents:
-            if self.agent_proximity(agent) and (self is not agent) and (self.xvector == 0):                 
-                self.engaged = True
-                interaction = (self.personality.positivity + (self.personality.mood / 10) + agent.personality.positivity + (agent.personality.mood / 10))/2 > random.randint(1,20)
-                if (self.personality.update_mood(interaction, 5) is False) and (self.playable is False):
+        if self.circle:
+            self.engaged = True
+            for agent in agents:
+                if self.calculate_interaction(agent) is False:
+                    self.personality.update_mood(False, 5)
                     self.interrupt()
-                agent.personality.update_mood(interaction, 5)
+                    return
+                self.personality.update_mood(True, 5)
 
     def change_side(self, facing_right):
         self.facing_right = facing_right
@@ -131,6 +137,7 @@ class NonPlayableAgent(Agent):
 
     def interrupt(self):
         self.engaged = False
+        self.interrupted = True
         xrand = random.randint(1, 500)
         yrand = random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)
         target_x = self.rect.x - xrand if self.facing_right else self.rect.x + xrand
