@@ -1,12 +1,11 @@
 This is a game based on the Hippocratic four temperaments personality model.
 
-Dependencies:
-pygame
-- Pygame builds games in Python
-important: pip install pygame==2.0.0.dev6 (developer pygame version) if working with Python 3.8
+Dependencies: pygame, simpleaudio, wavinfo
+
+- pygame - important: pip install pygame==2.0.0.dev6 (developer pygame version) if working with Python 3.8
 The standard pygame will not work with <= Python 3.7
 More info: https://pythonprogramming.altervista.org/how-to-install-pygame-in-python-3-8/
 
-simpleaudio		- simpleaudio plays audio files
+- simpleaudio - simpleaudio plays audio files
 
-wavinfo			- wavinfo gets metadata from wav audiofiles
+- wavinfo - wavinfo gets metadata from wav audiofiles
