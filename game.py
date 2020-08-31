@@ -52,23 +52,39 @@ class Game:
         new_screen.on = True
         self.this_screen = new_screen
 
-    def mingle(self):    
+    def playable_mingle(self):
+        for agent in self.playable_agents:
+            agent.agent_proximity(agent.circle)
+            agent.update_circle(self.nonplayable_agents)            
+            agent.xmove()
+            agent.ymove()
+
+    def npc_mingle(self):    
         for agent in self.nonplayable_agents:
-            if agent.quitting is True:
+            agent.set_state()
+            if agent.state == "quitting":
                 self.nonplayable_agents.remove(agent)
-            if agent.leaving is True:
+            elif agent.state == "leaving":
+                agent.xmove()
+                agent.ymove()
+                agent.stop()
                 agent.quit()
-            else:
-                agent.leave()
-                if (agent.feels_extroverted() is True) and agent.engaged is False:
-                    target = random.choice(self.nonplayable_agents)
-                    agent.acquire_targetx(target.rect.x) 
-                    agent.acquire_targety(target.rect.y) 
+            elif agent.state == "engaged":
+                agent.xmove()
+                agent.ymove()
+                agent.stop()
+                agent.agent_proximity(agent.circle)
                 agent.update_circle(self.nonplayable_agents)
-                agent.agent_proximity()
                 agent.interact(self.nonplayable_agents)
-            agent.stop()
-        for agent in self.nonplayable_agents + self.playable_agents:
+            elif agent.state == "idle":
+                agent.feels_extroverted(random.choice(self.nonplayable_agents))
+            elif agent.state == "disengaged":
+                agent.xmove()
+                agent.ymove()
+                agent.stop()
+
+    def music(self):
+        for agent in self.nonplayable_agents:
             agent.personality.circadian_rhythm()
             if agent.personality.circadian_rhythm_live():
                 if self.musicplayer.get_genre() is False:
@@ -77,8 +93,33 @@ class Game:
                 else:
                     agent.personality.music(self.musicplayer.get_genre())
                     agent.personality.reset_rhythm()
-            agent.xmove()
-            agent.ymove()
+
+#        for agent in self.nonplayable_agents:
+#            if agent.quitting is True:
+#                self.nonplayable_agents.remove(agent)
+#            if agent.leaving is True:
+#                agent.quit()
+#            else:
+#                agent.leave()
+#                if (agent.feels_extroverted() is True) and agent.engaged is False:
+#                    target = random.choice(self.nonplayable_agents)
+#                    agent.acquire_targetx(target.rect.x) 
+#                    agent.acquire_targety(target.rect.y) 
+#                agent.update_circle(self.nonplayable_agents)
+#                agent.agent_proximity()
+#                agent.interact(self.nonplayable_agents)
+#            agent.stop()
+#        for agent in self.nonplayable_agents + self.playable_agents:
+#            agent.personality.circadian_rhythm()
+#            if agent.personality.circadian_rhythm_live():
+#                if self.musicplayer.get_genre() is False:
+#                    agent.personality.return_to_base_mood()
+#                    agent.personality.reset_rhythm()
+#                else:
+#                    agent.personality.music(self.musicplayer.get_genre())
+#                    agent.personality.reset_rhythm()
+#            agent.xmove()
+#            agent.ymove()
 
     def run(self):
         self.this_screen.fill()
@@ -119,8 +160,8 @@ class Game:
             if self.player1.inventory:
                 for agent in self.nonplayable_agents:
                     if agent in self.player1.circle:
-                        self.this_screen.update_item_info(player.inventory[0], player)
-                        self.this_screen.display.blit(player.inventory[0].give.surface, player.inventory[0].give.rect)                    
+                        self.this_screen.update_item_info(self.player1.inventory[0], self.player1)
+                        self.this_screen.display.blit(self.player1.inventory[0].give.surface, self.player1.inventory[0].give.rect)                    
 
             for agent in total_agents:
                 self.this_screen.update_agents(agent)
@@ -131,7 +172,9 @@ class Game:
             self.this_screen.display.blit(self.this_screen.timer.surface, self.this_screen.timer.rect)
  
             if self.pause == False:
-                self.mingle() 
+                self.playable_mingle() 
+                self.npc_mingle()
+                self.music()
                 self.update_timer()
                 self.this_screen.update_timer_info(self.convert(self.time_elapsed))
                 self.calculate_win()
@@ -244,7 +287,7 @@ class Game:
                             item + 'LeftStand',
                             item + 'Right',
                             item + 'RightStand',
-                            (random.randint(0, SCREEN_WIDTH), random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)),
+                            (random.randint(0, SCREEN_WIDTH), random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT - 200)),
                             False
                             )
                         )
@@ -257,7 +300,7 @@ class Game:
                             item + 'LeftStand',
                             item + 'Right',
                             item + 'RightStand',
-                            (random.randint(0, SCREEN_WIDTH), 0),
+                            (random.randint(0, SCREEN_WIDTH), random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT - 200)),
                             True
                             )
                         )
@@ -320,7 +363,7 @@ class Game:
                         self.items.remove(taken)
                 else:
                     if self.player1.circle:
-                        self.player1.apply_item(self.player1.circle[0])
+                        self.player1.inventory[0].apply_item(self.player1.circle[0])
                         self.player1.inventory.clear()                          
             elif key == pygame.K_d:
                 self.player1.change_vector(5, 0)

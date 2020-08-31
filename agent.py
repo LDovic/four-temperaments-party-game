@@ -1,5 +1,6 @@
 import sys
 import os
+import math
 import pygame
 import random
 import time
@@ -31,9 +32,7 @@ class Agent:
         self.personality = personality 
         self.targetx = self.rect.x
         self.targety = self.rect.y
-        self.engaged = False
-        self.leaving = False
-        self.quitting = False
+        self.state = "idle"
         self.buttons = []
         self.extroversion_button = Button("Extroversion: " + str(self.personality.extroversion), (self.rect.x, self.rect.y - 30), (0, 0, 0), 12)
         self.positivity_button = Button("Positivity: " + str(self.personality.positivity), (self.rect.x, self.rect.y - 20), (0, 0, 0), 12)
@@ -62,35 +61,36 @@ class Agent:
                 return item
         return False
 
-    def agent_proximity(self):
-        self.circle.sort(key=lambda agent: agent.rect.x, reverse=False)     
+    def calculate_distance(self, agent):
+        return math.sqrt(pow(self.rect.x - agent.rect.x, 2) + pow(self.rect.y - agent.rect.y, 2)) 
+
+    def agent_proximity(self, agents):
+        self.circle.sort(key=lambda agent: agent.proximity, reverse=False)     
 
     def update_circle(self, agents):
         for agent in agents:
-            proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
+            proximity = self.calculate_distance(agent) < 100
+#            proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
             if (agent not in self.circle) and proximity and (self is not agent):
                 self.circle.append(agent)
+                agent.proximity = proximity
             elif agent in self.circle and not proximity:
                 self.circle.remove(agent)
-
-    def debug(self, agents):
-        print("!*******************!")
-        print("OWNER: " + self.name)
-        for agent in self.circle:
-            print(agent.name)
 
     def calculate_interaction(self, agent):
         return (self.personality.positivity + (self.personality.mood / 20) + agent.personality.positivity + (agent.personality.mood / 20))/2 > random.randint(1,20)
 
     def interact(self, agents):
         if self.circle:
-            self.engaged = True
-            for agent in agents:
+            for agent in self.circle:
                 if self.calculate_interaction(agent) is False:
                     self.personality.update_mood(False, 5)
-                    self.interrupt()
+                    self.circle[0].personality.update_mood(False, 5)
+                    if self.playable == False:
+                        self.interrupt()
                     return
                 self.personality.update_mood(True, 5)
+                self.circle[0].personality.update_mood(True, 5)
 
     def change_side(self, facing_right):
         self.facing_right = facing_right
@@ -132,11 +132,20 @@ class NonPlayableAgent(Agent):
     def __init__(self, name, LSprites, Lstand,  RSprites, Rstand, position, positivity, playable):
         super().__init__(name, LSprites, Lstand,  RSprites, Rstand, position, positivity, playable)
 
-    def feels_extroverted(self):
-        return random.randint(1, self.personality.extroversion) > random.randint(1, 500)
+    def set_state(self):
+        if (self.personality.mood == 0) and (self.state != "leaving") and (self.state != "quitting"):
+            self.leave()
+        elif ((self.xvector == 0) and (self.yvector == 0) and (self.state != "engaged") and (self.state != "leaving") and (self.state != "quitting")):
+            self.state = "idle"
+
+    def feels_extroverted(self, agent):
+        if random.randint(1, self.personality.extroversion) > random.randint(1, 500):
+            self.state = "engaged"
+            self.acquire_targetx(agent.rect.x)
+            self.acquire_targety(agent.rect.y)
 
     def interrupt(self):
-        self.engaged = False
+        self.state = "disengaged"
         self.interrupted = True
         xrand = random.randint(1, 500)
         yrand = random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)
@@ -172,14 +181,13 @@ class NonPlayableAgent(Agent):
             self.targety = self.rect.y
 
     def leave(self):
-         if self.get_mood() == 0:
-            self.change_vector(0, 1)
-            self.acquire_targetx(-100 if self.facing_right else SCREEN_WIDTH + 100)
-            self.leaving = True
+        self.state = "leaving"
+        self.change_vector(0, 1)
+        self.acquire_targetx(-100 if self.facing_right else SCREEN_WIDTH + 100)
 
     def quit(self):
        if self.xvector == 0:
-           self.quitting = True
+           self.state = "quitting"
 
 class PlayableAgent(Agent):
     def __init__(self, name, LSprites, Lstand,  RSprites, Rstand, position, positivity, playable):
