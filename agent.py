@@ -96,6 +96,8 @@ class Agent:
                     return
                 self.personality.update_mood(True, 5)
                 self.circle[0].personality.update_mood(True, 5)
+        elif (not self.circle) and (self.xvector == 0) and (self.yvector == 0):
+            self.state = "idle"
 
     def change_side(self, facing_right):
         self.facing_right = facing_right
