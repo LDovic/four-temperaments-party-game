@@ -34,12 +34,14 @@ class Agent:
         self.targety = self.rect.y
         self.state = "idle"
         self.buttons = []
-        self.extroversion_button = Button("Extroversion: " + str(self.personality.extroversion), (self.rect.x, self.rect.y - 30), (0, 0, 0), 12)
-        self.positivity_button = Button("Positivity: " + str(self.personality.positivity), (self.rect.x, self.rect.y - 20), (0, 0, 0), 12)
-        self.mood_button = Button("Mood: " + str(self.personality.mood), (self.rect.x, self.rect.y - 10), (0, 0, 0), 12)
+        self.extroversion_button = Button("Extroversion: " + str(self.personality.extroversion), (self.rect.x, self.rect.y - 30), BLACK, 12)
+        self.positivity_button = Button("Positivity: " + str(self.personality.positivity), (self.rect.x, self.rect.y - 20), BLACK, 12)
+        self.mood_button = Button("Mood: " + str(self.personality.mood), (self.rect.x, self.rect.y - 10), BLACK, 12)
+        self.temperament_button = Button(self.personality.temperament, (self.rect.x, self.rect.y - 40), WHITE, 12)
         self.buttons.append(self.extroversion_button)
         self.buttons.append(self.positivity_button)
         self.buttons.append(self.mood_button)
+        self.buttons.append(self.temperament_button)
         self.playable = playable
         self.item_prox = False
         self.inventory = []
@@ -53,6 +55,9 @@ class Agent:
 
     def get_positivity(self):
         return self.personality.positivity
+
+    def get_mood(self):
+        return self.personality.mood
 
     def item_proximity(self, items):
         for item in items:
@@ -80,7 +85,7 @@ class Agent:
     def calculate_interaction(self, agent):
         return (self.personality.positivity + (self.personality.mood / 20) + agent.personality.positivity + (agent.personality.mood / 20))/2 > random.randint(1,20)
 
-    def interact(self, agents):
+    def interact(self):
         if self.circle:
             for agent in self.circle:
                 if self.calculate_interaction(agent) is False:
@@ -139,6 +144,8 @@ class NonPlayableAgent(Agent):
             self.state = "idle"
 
     def feels_extroverted(self, agent):
+        if self == agent:
+            return
         if random.randint(1, self.personality.extroversion) > random.randint(1, 500):
             self.state = "engaged"
             self.acquire_targetx(agent.rect.x)

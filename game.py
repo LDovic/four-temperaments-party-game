@@ -40,7 +40,6 @@ class Game:
         self.create_difficulty_profiles()
         self.attach_profile_audios()
         self.create_background()
-        self.create_items()
 
     """RUN - Always running"""
 
@@ -61,7 +60,11 @@ class Game:
 
     def npc_mingle(self):    
         for agent in self.nonplayable_agents:
+            print(agent.name + ": " + agent.state + ", X: " + str(agent.xvector) + ", Y: " + str(agent.yvector) + ", " + str(agent.targetx) + ", " + str(agent.rect.x))
+            print(agent.circle)
             agent.set_state()
+            agent.agent_proximity(agent.circle)
+            agent.update_circle(self.nonplayable_agents)
             if agent.state == "quitting":
                 self.nonplayable_agents.remove(agent)
             elif agent.state == "leaving":
@@ -73,9 +76,7 @@ class Game:
                 agent.xmove()
                 agent.ymove()
                 agent.stop()
-                agent.agent_proximity(agent.circle)
-                agent.update_circle(self.nonplayable_agents)
-                agent.interact(self.nonplayable_agents)
+                agent.interact()
             elif agent.state == "idle":
                 agent.feels_extroverted(random.choice(self.nonplayable_agents))
             elif agent.state == "disengaged":
@@ -94,41 +95,16 @@ class Game:
                     agent.personality.music(self.musicplayer.get_genre())
                     agent.personality.reset_rhythm()
 
-#        for agent in self.nonplayable_agents:
-#            if agent.quitting is True:
-#                self.nonplayable_agents.remove(agent)
-#            if agent.leaving is True:
-#                agent.quit()
-#            else:
-#                agent.leave()
-#                if (agent.feels_extroverted() is True) and agent.engaged is False:
-#                    target = random.choice(self.nonplayable_agents)
-#                    agent.acquire_targetx(target.rect.x) 
-#                    agent.acquire_targety(target.rect.y) 
-#                agent.update_circle(self.nonplayable_agents)
-#                agent.agent_proximity()
-#                agent.interact(self.nonplayable_agents)
-#            agent.stop()
-#        for agent in self.nonplayable_agents + self.playable_agents:
-#            agent.personality.circadian_rhythm()
-#            if agent.personality.circadian_rhythm_live():
-#                if self.musicplayer.get_genre() is False:
-#                    agent.personality.return_to_base_mood()
-#                    agent.personality.reset_rhythm()
-#                else:
-#                    agent.personality.music(self.musicplayer.get_genre())
-#                    agent.personality.reset_rhythm()
-#            agent.xmove()
-#            agent.ymove()
-
     def run(self):
         self.this_screen.fill()
         if self.this_screen.name == "Start":
+            self.musicplayer.stop()
             self.this_screen.blit_buttons(self.this_screen.start_buttons)
 
         elif self.this_screen.name == "Loading":
             self.this_screen.blit_buttons(self.this_screen.loading_buttons)
             self.create_agents() 
+            self.create_items()
             self.set_screens(self.instructions_screen)
 
         elif self.this_screen.name == "Game":
@@ -348,7 +324,7 @@ class Game:
                 for agent in self.nonplayable_agents:
                     agent.personality.display_info = True
             elif key == pygame.K_e:
-                self.player1.interact(self.nonplayable_agents)
+                self.player1.interact()
             elif key == pygame.K_w:
                 self.player1.change_vector(-5, 1)
             elif key == pygame.K_s:
@@ -374,6 +350,9 @@ class Game:
             if key == pygame.K_SPACE:
                 self.pause = False
                 self.set_screens(self.game_screen) 
+        elif self.this_screen.name == "Lose":
+            if key == pygame.K_SPACE or key == pygame.K_RETURN:
+                self.set_screens(self.start_screen)
 
     def mouse_button_down(self, pos):
         if self.this_screen.name == "Start":
@@ -399,16 +378,6 @@ class Game:
                         self.difficulty_level = name
                 self.set_screens(self.loading_screen)
       
-        elif self.this_screen.name == "Game":
-            if self.musicplayer.next_track_button.rect.collidepoint(pos):
-                self.musicplayer.change_track()
-            if self.musicplayer.now_playing is False:
-                if self.musicplayer.play_button.rect.collidepoint(pos):
-                    self.musicplayer.play()
-            else:
-                if self.musicplayer.stop_button.rect.collidepoint(pos):
-                    self.musicplayer.stop()
-
         elif self.this_screen.name == "Introduction":
             if self.this_screen.index >= len(self.this_screen.images) - 1:
                 self.set_screens(self.start_screen)
@@ -456,8 +425,11 @@ class Game:
             pass
         for character in self.character_profiles.values():
             if character['display']:
-                self.active_character_audio = character['audio'][random.randint(0, len(character['audio']) - 1)].play()
- 
+                try:
+                    self.active_character_audio = character['audio'][random.randint(0, len(character['audio']) - 1)].play()
+                except KeyError:
+                    pass 
+
     def choose_character(self):
         tick = 0
  
@@ -474,7 +446,6 @@ class Game:
                 character['display'] = True
             tick += 1
 
-        self.play_character_audio()
         self.choose_character_tick += 1
 
     def convert(self, milliseconds): 
@@ -506,4 +477,5 @@ class Game:
 
     def is_game_over(self):
         if len(self.nonplayable_agents) < self.get_difficulty():
+            self.timer_on = False
             self.set_screens(self.lose_screen)

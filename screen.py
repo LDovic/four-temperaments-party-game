@@ -77,11 +77,14 @@ class GameScreen(Screen):
     def update_agent_info(self, agent):
         agent.mood_button.change_text("Mood: " + str(agent.get_mood()))
         agent.extroversion_button.change_text("Extroversion: " + str(agent.get_extroversion()))
+        agent.positivity_button.change_text("Positivity: " + str(agent.get_positivity()))
+        agent.mood_button.change_text("Mood: " + str(agent.get_mood()))
 
         agent.extroversion_button.update_color(agent.name, agent.get_extroversion() * 10)
         agent.positivity_button.update_color(agent.name, agent.get_positivity() * 10)
         agent.mood_button.update_color(agent.name, agent.get_mood())
 
+        agent.temperament_button.change_position_xy(agent.rect.x, agent.rect.y - 40)
         agent.mood_button.change_position_xy(agent.rect.x, agent.rect.y - 30) 
         agent.positivity_button.change_position_xy(agent.rect.x, agent.rect.y - 20) 
         agent.extroversion_button.change_position_xy(agent.rect.x, agent.rect.y - 10)

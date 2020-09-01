@@ -99,9 +99,14 @@ class Personality:
                 self.extroversion += 1
 
     def get_messed_up(self):
-        for x in range(0, random.randint(0, 10)):
-            if self.positivity < 10:
-                self.positivity += 1
+        for x in range(0, 100):
+            if self.mood < 100:
+                self.mood += 1
+
+    def eat(self):
+        for x in range(0, 10):
+            if self.mood < 100:
+                self.mood += 1
 
 class Sanguine(Personality):
     def __init__(self, temperament, extroversion, positivity):
