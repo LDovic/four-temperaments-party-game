@@ -6,6 +6,11 @@ bundle_dir = getattr(sys, '_MEIPASS', path.abspath(path.dirname("__file__")))
 assets = path.join(bundle_dir, 'assets')
 audio = path.join(bundle_dir, 'audio')
 fonts = path.join(bundle_dir, 'fonts')
+background = path.join(bundle_dir, 'background')
+characters = path.join(bundle_dir, 'characters')
+items = path.join(bundle_dir, 'items')
+introduction = path.join(bundle_dir, 'introduction')
+difficulty = path.join(bundle_dir, 'difficulty')
 
 # -*- mode: python ; coding: utf-8 -*-
 
@@ -13,9 +18,9 @@ block_cipher = None
 
 
 a = Analysis(['main.spec'],
-             pathex=['/Users/ludovicnoble/pygame5/game3'],
+             pathex=['/Users/ludovicnoble/pygame6/partywithdist'],
              binaries=[],
-             datas=[(assets, 'assets'), (audio, 'audio'), (fonts, 'fonts')],
+             datas=[(audio, 'audio'), (fonts, 'fonts'), (background, 'background'), (characters, 'characters'), (items, 'items'), (introduction, 'introduction'), (difficulty, 'difficulty')],
              hiddenimports=["pygame", "simpleaudio", "wavinfo", "game"],
              hookspath=[],
              runtime_hooks=[],

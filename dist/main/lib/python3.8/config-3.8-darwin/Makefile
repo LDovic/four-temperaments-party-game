@@ -30,8 +30,8 @@ MODLIBS=           $(LOCALMODLIBS) $(BASEMODLIBS)
 VERSION=	3.8
 srcdir=		.
 
-abs_srcdir=	/private/tmp/python@3.8-20200708-82077-1co18c3/Python-3.8.3
-abs_builddir=	/private/tmp/python@3.8-20200708-82077-1co18c3/Python-3.8.3
+abs_srcdir=	/private/tmp/python@3.8-20200721-20005-1n5bn6z/Python-3.8.5
+abs_builddir=	/private/tmp/python@3.8-20200721-20005-1n5bn6z/Python-3.8.5
 
 
 CC=		clang
@@ -187,7 +187,7 @@ LIPO_32BIT_FLAGS=
 OTHER_LIBTOOL_OPT=
 
 # Environment to run shared python without installed libraries
-RUNSHARED=       DYLD_FRAMEWORK_PATH=/private/tmp/python@3.8-20200708-82077-1co18c3/Python-3.8.3
+RUNSHARED=       DYLD_FRAMEWORK_PATH=/private/tmp/python@3.8-20200721-20005-1n5bn6z/Python-3.8.5
 
 # ensurepip options
 ENSUREPIP=      no
