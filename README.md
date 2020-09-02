@@ -9,3 +9,10 @@ More info: https://pythonprogramming.altervista.org/how-to-install-pygame-in-pyt
 - simpleaudio - simpleaudio plays audio files
 
 - wavinfo - wavinfo gets metadata from wav audiofiles
+
+Built with pyinstaller
+https://www.pyinstaller.org/
+
+To build:
+- Add dependencies to main.spec
+- Terminal command: pyinstaller --onedir --noupx main.spec (from same dist as main.spec)
