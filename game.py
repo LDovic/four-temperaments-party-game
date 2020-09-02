@@ -60,8 +60,6 @@ class Game:
 
     def npc_mingle(self):    
         for agent in self.nonplayable_agents:
-            print(agent.name + ": " + agent.state + ", X: " + str(agent.xvector) + ", Y: " + str(agent.yvector) + ", " + str(agent.targetx) + ", " + str(agent.rect.x))
-            print(agent.circle)
             agent.set_state()
             agent.agent_proximity(agent.circle)
             agent.update_circle(self.nonplayable_agents)
@@ -98,6 +96,8 @@ class Game:
     def run(self):
         self.this_screen.fill()
         if self.this_screen.name == "Start":
+            self.timer_on = False
+            self.time_elapsed = 0
             self.musicplayer.stop()
             self.this_screen.blit_buttons(self.this_screen.start_buttons)
 
@@ -110,6 +110,7 @@ class Game:
         elif self.this_screen.name == "Game":
             if self.timer_on == False:
                 self.start_timer()
+                self.start_time = self.timer.get_rawtime()
 
             for asset in self.background:
                 self.this_screen.display.blit(asset.image, asset.rect)
@@ -133,17 +134,16 @@ class Game:
                 else:
                     agent.item_prox = False
 
-            if self.player1.inventory:
-                for agent in self.nonplayable_agents:
-                    if agent in self.player1.circle:
-                        self.this_screen.update_item_info(self.player1.inventory[0], self.player1)
-                        self.this_screen.display.blit(self.player1.inventory[0].give.surface, self.player1.inventory[0].give.rect)                    
-
             for agent in total_agents:
                 self.this_screen.update_agents(agent)
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)
+
+            if self.player1.inventory:
+                if self.player1.circle:
+                    self.this_screen.update_item_info(self.player1.inventory[0], self.player1)
+                    self.this_screen.display.blit(self.player1.inventory[0].give.surface, self.player1.inventory[0].give.rect)
             
             self.this_screen.display.blit(self.this_screen.timer.surface, self.this_screen.timer.rect)
  
@@ -157,6 +157,7 @@ class Game:
                 self.is_game_over()
             else:
                 self.set_screens(self.instructions_screen)
+
         elif self.this_screen.name == "Instructions":
             self.pause = True
             self.this_screen.position_buttons_vertical_center(self.this_screen.instructions_buttons)
@@ -353,6 +354,9 @@ class Game:
         elif self.this_screen.name == "Lose":
             if key == pygame.K_SPACE or key == pygame.K_RETURN:
                 self.set_screens(self.start_screen)
+        elif self.this_screen.name == "Win":
+            if key == pygame.K_SPACE or key == pygame.K_RETURN:
+                self.set_screens(self.start_screen)
 
     def mouse_button_down(self, pos):
         if self.this_screen.name == "Start":
@@ -466,16 +470,12 @@ class Game:
 
     def calculate_win(self):
         self.time_elapsed += self.timer.get_rawtime()
-        if self.time_elapsed/1000 > 600:
+        if self.time_elapsed > 600000:
             self.set_screens(self.win_screen)
 
-    def get_difficulty(self):
+    def is_game_over(self): 
+        condition = 2
         if self.difficulty_level == 'Hard':
-            return self.nonplayable_agents_starting_total
-        if self.difficulty_level == 'Easy':
-            return 2
-
-    def is_game_over(self):
-        if len(self.nonplayable_agents) < self.get_difficulty():
-            self.timer_on = False
+            condition = self.nonplayable_agents_starting_total
+        if len(self.nonplayable_agents) < condition:
             self.set_screens(self.lose_screen)

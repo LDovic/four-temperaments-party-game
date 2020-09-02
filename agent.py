@@ -155,8 +155,7 @@ class NonPlayableAgent(Agent):
 
     def interrupt(self):
         self.state = "disengaged"
-        self.interrupted = True
-        xrand = random.randint(1, 500)
+        xrand = random.randint(1, 300)
         yrand = random.randint(FLOOR_HEIGHT, SCREEN_HEIGHT)
         target_x = self.rect.x - xrand if self.facing_right else self.rect.x + xrand
         target_y = self.rect.y - yrand if self.rect.y > (FLOOR_HEIGHT + 50) else self.rect.y + yrand 
