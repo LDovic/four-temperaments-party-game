@@ -56,6 +56,7 @@ class Game:
         self.create_background()
 
     """Always running"""
+
     """
     This is always called by main.py
     It deals mainly with displaying (blitting) images to the screen
@@ -149,10 +150,10 @@ class Game:
             self.this_screen.display.blit(self.this_screen.images[self.this_screen.get_index()], self.this_screen.images[self.this_screen.get_index()].get_rect())
 
     """Always running in game"""
+
     """
     These 'mingle' methods determine agent behaviour in-game and are always called, while the set screen is the game screen.
     """
-
 
     def playable_mingle(self):
         for agent in self.playable_agents:
@@ -164,6 +165,7 @@ class Game:
     """
     This method determines how an npc agent should behave according to its state.
     """
+
     def npc_mingle(self):
         for agent in self.nonplayable_agents:
             agent.set_state()
@@ -191,6 +193,7 @@ class Game:
     """
     This method determines how the agent will respond to music. If there is no music playing, then the agent's mood will return to its baseline (the 'circadian rhythm' methods).
     """
+
     def music(self):
         for agent in self.nonplayable_agents:
             agent.personality.circadian_rhythm()
@@ -429,6 +432,7 @@ class Game:
     This method is called whenever a screen changes.
     There is functionality for a back button to be used with it but it is not as of yet used.
     """
+
     def set_screens(self, new_screen):
         self.back_screen = self.this_screen
         for screen in self.screens:
