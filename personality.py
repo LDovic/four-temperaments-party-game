@@ -111,13 +111,13 @@ class Personality:
             if self.extroversion < 10:
                 self.extroversion += 1
 
-    def get_messed_up(self):
-        for x in range(0, 100):
-            if self.mood < 100:
-                self.mood += 1
-
-    def eat(self):
+    def get_magical(self):
         for x in range(0, 10):
+            if self.positivity < 10:
+                self.positivity += 1
+
+    def eat(self, score):
+        for x in range(0, score):
             if self.mood < 100:
                 self.mood += 1
 

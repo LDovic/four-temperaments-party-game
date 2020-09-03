@@ -75,7 +75,7 @@ class Agent:
 
     def item_proximity(self, items):
         for item in items:
-            if (self.rect.x in range(item.rect.x - 101, item.rect.x + 101)) and (self.rect.y in range(item.rect.y - 20, item.rect.y + 20)):
+            if (self.rect.x in range(item.rect.x - 101, item.rect.x + 101)) and (self.rect.y in range(item.rect.y - 100, item.rect.y + 20)):
                 self.item_prox = item
                 return item
         return False
