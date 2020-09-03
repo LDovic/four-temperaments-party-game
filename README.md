@@ -10,7 +10,7 @@ THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLI
 
 End license.
 
-This is a game based on the <a href="https://en.wikipedia.org/wiki/Four_temperaments">Hippocratic four temperaments personality model</a>. The aim of the game is to throw a successful party with a mix of the four personalities outlined by the model.
+This is a game based on the <a href="https://en.wikipedia.org/wiki/Four_temperaments" target="_blank">Hippocratic four temperaments personality model</a>. The aim of the game is to throw a successful party with a mix of the four personalities outlined by the model.
 
 Dependencies: pygame, simpleaudio, wavinfo
 
