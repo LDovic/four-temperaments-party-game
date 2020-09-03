@@ -8,6 +8,20 @@ from constants import *
 from button import Button
 from personality import Personality
 
+"""
+This class has one super class ('agent') and two subclasses ('playable' and 'nonplayable').
+Each agent object has a personality object.
+Agent objects are passed .png images that are loaded as pygame images into two arrays (left-facing and right-facing) upon creation.
+
+Nonplayable agents have a 'state' which determines their behaviour.
+There are five states an npc can be in:
+	- idle: agent is standing still, not doing anything
+        - engaged: agent is either approaching another agent or interacting with another agent.
+        - disengaged: agent is moving away from another agent after a negative interaction.
+        - leaving: agent is leaving the party.
+        - quitting: agent object is being removed from the list owned by the main game object.
+"""
+
 class Agent:
     def __init__(self, name, personality, LSprites, Lstand,  RSprites, Rstand, position, playable):
         self.name = name
@@ -66,6 +80,10 @@ class Agent:
                 return item
         return False
 
+    """
+    Calculates most proximal agent and updates the agent's 'circle'.
+    """
+
     def calculate_distance(self, agent):
         return math.sqrt(pow(self.rect.x - agent.rect.x, 2) + pow(self.rect.y - agent.rect.y, 2)) 
 
@@ -75,15 +93,22 @@ class Agent:
     def update_circle(self, agents):
         for agent in agents:
             proximity = self.calculate_distance(agent) < 100
-#            proximity = self.rect.x in range(agent.rect.x - 101, agent.rect.x + 101)
             if (agent not in self.circle) and proximity and (self is not agent):
                 self.circle.append(agent)
                 agent.proximity = proximity
             elif agent in self.circle and not proximity:
                 self.circle.remove(agent)
 
+    """
+    Calculates whether an interaction with another agent is 'positive' or 'negative' according to the agent's positivity trait with a slight influence of the agent's mood.
+    """
+
     def calculate_interaction(self, agent):
         return (self.personality.positivity + (self.personality.mood / 20) + agent.personality.positivity + (agent.personality.mood / 20))/2 > random.randint(1,20)
+
+    """
+    An npc agent will interrupt its interaction if its interaction is negative and will disengage (walk away).
+    """
 
     def interact(self):
         if self.circle:
@@ -144,6 +169,10 @@ class NonPlayableAgent(Agent):
             self.leave()
         elif ((self.xvector == 0) and (self.yvector == 0) and (self.state != "engaged") and (self.state != "leaving") and (self.state != "quitting")):
             self.state = "idle"
+
+    """
+    An agent's likelihood to approach another agent is determined by its extroversion trait.
+    """
 
     def feels_extroverted(self, agent):
         if self == agent:

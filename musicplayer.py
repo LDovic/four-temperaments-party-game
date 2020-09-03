@@ -3,6 +3,12 @@ from wavinfo import WavInfoReader
 from constants import *
 from button import *
 
+"""
+This class contains the musicplayer object. It controls the playing and stopping of tracks.
+This class depends on simpleaudio and wavinfo Python packages. simpleaudio allows audio files to be played and wavinfo allows track metadata to be extracted.
+Audio files must contain metadata (track name, artist name and genre).
+"""
+
 class MusicPlayer():
     def __init__(self):
         self.tracks = self.create_tracks()

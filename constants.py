@@ -2,6 +2,14 @@ import os
 import sys
 from os import path
 
+"""
+This class contains the constant values that are used by most other classes.
+"""
+
+"""
+This function declares whether the package is being run as an executable or as a Python package.
+"""
+
 def bundle_check():
     try:
         getattr(sys, 'frozen') and hasattr(sys, '_MEIPASS')
@@ -19,6 +27,7 @@ bundle = bundle_check()
 DIRECTORIES
 """
 
+#The game will not run as an executable unless '__MEIPASS' is used to determine the current working directory.
 if not bundle:
     CWD = os.getcwd()
 else:

@@ -2,6 +2,12 @@ from constants import *
 from button import *
 import math
 
+"""
+Each screen is a subclass of one superclass 'screen'.
+The screen class controls the display for each screen. All calls to display some button or image should be passed through here.
+The position and content of buttons as well as the color are updated in the GameScreen class. 
+"""
+
 class Screen():
     def __init__(self, name, on, display):
         self.name = name
@@ -64,6 +70,7 @@ class GameScreen(Screen):
     def update_item_info(self, item, agent):
         item.give.change_position_xy(agent.rect.x, agent.rect.y - 30)
 
+    #This method determines the agent walk animation cycle by displaying a sequence of images according elapsed microseconds, determined by the framerate.
     def update_agents(self, agent):
         if agent.xvector == 0 and agent.yvector == 0:
             self.display.blit(agent.Rstand, agent.rect) if agent.facing_right else self.display.blit(agent.Lstand, agent.rect) 

@@ -2,6 +2,10 @@ import pygame
 import pygame.freetype
 from constants import *
 
+"""
+Pygame 'buttons' are objects used for displaying text on screen. All in-game text are button objects that some class (for example, an agent or a screen) has.
+"""
+
 class Button:
     def __init__(self, text, position, color, size):
       self.text = text

@@ -13,6 +13,20 @@ import random
 import simpleaudio as audio
 import datetime
 
+"""
+
+This class creates a game object that contains the entire game, from start screen to win screen.
+The class' methods are divided into five sections:
+- The 'always running' group which contains one method, 'run'. This method is called by main during the main 'while' loop and determines which methods will be called according to which screen is set.
+- The 'always running during game' group that contain the methods that are constantly called when the set screen is the game screen.
+- The methods that create the game objects (items, characters etc) that are called when game object is created and when set screen is the loading screen.
+- The controls group which contain the game controls.
+- The game logic group which contain the methods the control the flow of the game and win and lose conditions. 
+Game flow is controlled by which screen is set. If, for example, the game screen is the set screen then the 'run' method will display the content for the game screen.
+The flow of the game is controlled by game events (such as a win or a loss) but also by user control events, in the controls methods. When this happens, the set screen changes and the 'run' method will display the appropriate content.
+
+"""
+
 class Game:
     def __init__(self):
         pygame.init()
@@ -41,57 +55,11 @@ class Game:
         self.attach_profile_audios()
         self.create_background()
 
-    """RUN - Always running"""
-
-    def set_screens(self, new_screen):
-        self.back_screen = self.this_screen
-        for screen in self.screens:
-            if screen is not new_screen:
-                screen.on = False
-        new_screen.on = True
-        self.this_screen = new_screen
-
-    def playable_mingle(self):
-        for agent in self.playable_agents:
-            agent.agent_proximity(agent.circle)
-            agent.update_circle(self.nonplayable_agents)            
-            agent.xmove()
-            agent.ymove()
-
-    def npc_mingle(self):    
-        for agent in self.nonplayable_agents:
-            agent.set_state()
-            agent.agent_proximity(agent.circle)
-            agent.update_circle(self.nonplayable_agents)
-            if agent.state == "quitting":
-                self.nonplayable_agents.remove(agent)
-            elif agent.state == "leaving":
-                agent.xmove()
-                agent.ymove()
-                agent.stop()
-                agent.quit()
-            elif agent.state == "engaged":
-                agent.xmove()
-                agent.ymove()
-                agent.stop()
-                agent.interact()
-            elif agent.state == "idle":
-                agent.feels_extroverted(random.choice(self.nonplayable_agents))
-            elif agent.state == "disengaged":
-                agent.xmove()
-                agent.ymove()
-                agent.stop()
-
-    def music(self):
-        for agent in self.nonplayable_agents:
-            agent.personality.circadian_rhythm()
-            if agent.personality.circadian_rhythm_live():
-                if self.musicplayer.get_genre() is False:
-                    agent.personality.return_to_base_mood()
-                    agent.personality.reset_rhythm()
-                else:
-                    agent.personality.music(self.musicplayer.get_genre())
-                    agent.personality.reset_rhythm()
+    """Always running"""
+    """
+    This is always called by main.py
+    It deals mainly with displaying (blitting) images to the screen
+    """
 
     def run(self):
         self.this_screen.fill()
@@ -179,6 +147,60 @@ class Game:
 
         elif self.this_screen.name == "Introduction":
             self.this_screen.display.blit(self.this_screen.images[self.this_screen.get_index()], self.this_screen.images[self.this_screen.get_index()].get_rect())
+
+    """Always running in game"""
+    """
+    These 'mingle' methods determine agent behaviour in-game and are always called, while the set screen is the game screen.
+    """
+
+
+    def playable_mingle(self):
+        for agent in self.playable_agents:
+            agent.agent_proximity(agent.circle)
+            agent.update_circle(self.nonplayable_agents)
+            agent.xmove()
+            agent.ymove()
+
+    """
+    This method determines how an npc agent should behave according to its state.
+    """
+    def npc_mingle(self):
+        for agent in self.nonplayable_agents:
+            agent.set_state()
+            agent.agent_proximity(agent.circle)
+            agent.update_circle(self.nonplayable_agents)
+            if agent.state == "quitting":
+                self.nonplayable_agents.remove(agent)
+            elif agent.state == "leaving":
+                agent.xmove()
+                agent.ymove()
+                agent.stop()
+                agent.quit()
+            elif agent.state == "engaged":
+                agent.xmove()
+                agent.ymove()
+                agent.stop()
+                agent.interact()
+            elif agent.state == "idle":
+                agent.feels_extroverted(random.choice(self.nonplayable_agents))
+            elif agent.state == "disengaged":
+                agent.xmove()
+                agent.ymove()
+                agent.stop()
+
+    """
+    This method determines how the agent will respond to music. If there is no music playing, then the agent's mood will return to its baseline (the 'circadian rhythm' methods).
+    """
+    def music(self):
+        for agent in self.nonplayable_agents:
+            agent.personality.circadian_rhythm()
+            if agent.personality.circadian_rhythm_live():
+                if self.musicplayer.get_genre() is False:
+                    agent.personality.return_to_base_mood()
+                    agent.personality.reset_rhythm()
+                else:
+                    agent.personality.music(self.musicplayer.get_genre())
+                    agent.personality.reset_rhythm()
 
     """LOAD GAME DATA"""
 
@@ -403,6 +425,18 @@ class Game:
 
     """GAME LOGIC"""
 
+    """
+    This method is called whenever a screen changes.
+    There is functionality for a back button to be used with it but it is not as of yet used.
+    """
+    def set_screens(self, new_screen):
+        self.back_screen = self.this_screen
+        for screen in self.screens:
+            if screen is not new_screen:
+                screen.on = False
+        new_screen.on = True
+        self.this_screen = new_screen
+
     def choose_difficulty(self):
         tick = 0
  
@@ -452,6 +486,7 @@ class Game:
 
         self.choose_character_tick += 1
 
+    #for displaying the timer on screen during the game
     def convert(self, milliseconds): 
         seconds = milliseconds/1000
         seconds = seconds % (24 * 3600) 

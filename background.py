@@ -2,6 +2,10 @@ import pygame
 from constants import *
 import os
 
+"""
+This class creates a background object based the files in the background folder.
+"""
+
 class Background:
     def __init__(self, name, position):
         self.name = name

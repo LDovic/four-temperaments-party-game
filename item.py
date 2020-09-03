@@ -3,6 +3,11 @@ import pygame
 from constants import *
 from button import *
 
+"""
+ItemFactory is in the factory design pattern. It is created by the game object and used to return an item object, which is the super class of which all particular items are subclasses.
+Division of items into particular subclasses allows the effects of items to be fine tuned.
+"""
+
 class ItemFactory():
     def factory(name):
         if name == 'WhiskeyBottle':
