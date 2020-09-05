@@ -23,21 +23,13 @@ There are five states an npc can be in:
 """
 
 class Agent:
-    def __init__(self, name, personality, LSprites, Lstand,  RSprites, Rstand, position, playable):
+    def __init__(self, name, personality, LWalk, LStand,  RWalk, RStand, position, playable):
         self.name = name
-        self.Limages = []
-        self.Rimages = []
-        path = CHARACTERS + self.name + '/'
-        for x in range(1, 9):
-            Lpath = os.path.join(path + LSprites + str(x) + ASSET_FILE_TYPE)
-            Rpath = os.path.join(path + RSprites + str(x) + ASSET_FILE_TYPE)
-            self.Limages.append(pygame.image.load(Lpath).convert_alpha())
-            self.Rimages.append(pygame.image.load(Rpath).convert_alpha())
-        Rpath = os.path.join(path + Rstand) + ASSET_FILE_TYPE 
-        self.Rstand = pygame.image.load(Rpath).convert_alpha()
-        Lpath = os.path.join(path + Lstand) + ASSET_FILE_TYPE
-        self.Lstand = pygame.image.load(Lpath).convert_alpha()
-        self.rect = self.Lstand.get_rect()
+        self.LWalk = self.image_list(LWalk, 9)
+        self.RWalk = self.image_list(RWalk, 9)
+        self.LStand = self.add_image(LStand)
+        self.RStand = self.add_image(RStand)
+        self.rect = self.LStand.get_rect()
         self.facing_right = True
         self.rect.x = position[0]
         self.rect.y = position[1]
@@ -60,6 +52,17 @@ class Agent:
         self.item_prox = False
         self.inventory = []
         self.circle = []
+
+    def add_image(self, image):
+        path = CHARACTERS + self.name + '/'
+        full_path = os.path.join(path + image + ASSET_FILE_TYPE)
+        return pygame.image.load(os.path.join(full_path)).convert_alpha()
+
+    def image_list(self, image, loop):
+        return_list = []
+        for x in range(1, loop):
+            return_list.append(self.add_image(image + str(x)))
+        return return_list
 
     def get_mood(self):
         return self.personality.mood

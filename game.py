@@ -104,7 +104,7 @@ class Game:
                     agent.item_prox = False
 
             for agent in total_agents:
-                self.this_screen.update_agents(agent)
+                self.this_screen.update_agents(agent, self.musicplayer.get_genre())
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)

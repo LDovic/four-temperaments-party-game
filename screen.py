@@ -58,7 +58,8 @@ class StartScreen(Screen):
 class GameScreen(Screen):
     def __init__(self, name, on, display):
         super().__init__(name, on, display)
-        self.tick = 0
+        self.walk_tick = 0
+        self.dance_tick = 0
         self.timer = Button("", ((SCREEN_WIDTH/4)*3, 0), GREY, 24)
 
     def update_timer_info(self, time):
@@ -70,16 +71,16 @@ class GameScreen(Screen):
     def update_item_info(self, item, agent):
         item.give.change_position_xy(agent.rect.x, agent.rect.y - 30)
 
-    #This method determines the agent walk animation cycle by displaying a sequence of images according elapsed microseconds, determined by the framerate.
-    def update_agents(self, agent):
+    #This method determines the agent walk animation cycle by displaying a sequence of images according elapsed microseconds, determined by the framerate or shows the standing still agent image.
+    def update_agents(self, agent, music):
         if agent.xvector == 0 and agent.yvector == 0:
-            self.display.blit(agent.Rstand, agent.rect) if agent.facing_right else self.display.blit(agent.Lstand, agent.rect) 
+            self.display.blit(agent.RStand, agent.rect) if agent.facing_right else self.display.blit(agent.LStand, agent.rect) 
             return
-        self.tick += 1
-        rounded_tick = math.ceil(self.tick / 4) - 1 
-        if self.tick >= len(agent.Rimages) * 4:
-            self.tick = 0 
-        self.display.blit(agent.Rimages[rounded_tick], agent.rect) if agent.facing_right else self.display.blit(agent.Limages[rounded_tick], agent.rect)
+        self.walk_tick += 1
+        rounded_tick = math.ceil(self.walk_tick / 4) - 1 
+        if self.walk_tick >= len(agent.RWalk) * 4:
+            self.walk_tick = 0 
+        self.display.blit(agent.RWalk[rounded_tick], agent.rect) if agent.facing_right else self.display.blit(agent.LWalk[rounded_tick], agent.rect)
 
     def update_agent_info(self, agent):
         agent.mood_button.change_text("Mood: " + str(agent.get_mood()))
