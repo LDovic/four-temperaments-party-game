@@ -13,10 +13,10 @@ This function declares whether the package is being run as an executable or as a
 def bundle_check():
     try:
         getattr(sys, 'frozen') and hasattr(sys, '_MEIPASS')
-        print('running in a PyInstaller bundle')
+        buildstate = 'running in a PyInstaller bundle'
         bundle = True
     except:
-        print('running in a normal Python process')
+        buildstate = 'running in a normal Python process'
         bundle = False
 
     return bundle

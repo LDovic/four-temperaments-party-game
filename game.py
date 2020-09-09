@@ -38,7 +38,7 @@ class Game:
         self.time_elapsed = 0
 
         self.display = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("L Noble Project")
+        pygame.display.set_caption("Four Temperaments Party Game")
 
         self.musicplayer = MusicPlayer()
 

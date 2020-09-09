@@ -1,6 +1,10 @@
+import os
+os.environ['PYGAME_HIDE_SUPPORT_PROMPT'] = "hide"
 import pygame
 from game import Game
 from constants import *
+from os.path import join
+from os import chdir
 
 game = Game()
 
