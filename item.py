@@ -129,7 +129,7 @@ class CrabSticks(Item):
 class Weed(Item):
     def __init__(self, name):
         super().__init__(name)
-        self.rect.x = 1200
+        self.rect.x = 500
         self.rect.y = 450
         self.take = Button("Take Weed (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
         self.give = Button("Give Weed (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
