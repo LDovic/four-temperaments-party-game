@@ -140,9 +140,9 @@ class Agent:
         if self.rect.y < FLOOR_HEIGHT:
             self.yvector = 0
             self.rect.y = 400
-        if self.rect.y > SCREEN_HEIGHT - 200:
+        if self.rect.y > SCREEN_HEIGHT - 250:
             self.yvector = 0
-            self.rect.y = SCREEN_HEIGHT - 200
+            self.rect.y = SCREEN_HEIGHT - 250
 
     def xboundaries(self):
         if self.rect.x < 0:

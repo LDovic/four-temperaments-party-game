@@ -50,7 +50,15 @@ class Personality:
         self.mood = self.base_mood
         self.circadian_rhythm_on = False
         self.dt = pygame.time.get_ticks() / 1000
-        self.display_info = False
+        self.display_info_modulo = 0
+        self.display_info = False 
+
+    def toggle_display_info(self):
+        self.display_info_modulo += 1
+        if self.display_info_modulo % 2 == 0:
+            return False
+        else:
+            return True
 
     def calculate_temperament(self):
         if self.extroversion >= 5:
@@ -98,7 +106,7 @@ class Personality:
             "Hip Hop": self.hiphop, 
             "Pop": self.pop,
             "Classical": self.classical
-        }   
+        }
         mood = switcher.get(genre, False)[0]
         value = switcher.get(genre, False)[1]
         self.update_mood(mood, value)

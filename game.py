@@ -6,6 +6,7 @@ from personality import *
 from button import Button
 from screen import * 
 from musicplayer import *
+from messageboard import *
 from background import *
 from item import *
 import math
@@ -38,9 +39,10 @@ class Game:
         self.time_elapsed = 0
 
         self.display = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
-        pygame.display.set_caption("L Noble Project")
+        pygame.display.set_caption("Four Temperaments Party Game")
 
         self.musicplayer = MusicPlayer()
+        self.messageboard = MessageBoard()
 
         self.choose_character_tick = 0
         self.invitees = len(os.listdir(CHARACTERS)) - 1
@@ -84,8 +86,6 @@ class Game:
             for asset in self.background:
                 self.this_screen.display.blit(asset.image, asset.rect)
 
-            self.this_screen.blit_buttons(self.musicplayer.musicplayer_secondary_buttons)
-
             for item in self.items:
                 self.this_screen.update_items(item)
 
@@ -103,19 +103,26 @@ class Game:
                 else:
                     agent.item_prox = False
 
+            self.this_screen.display_message_board()
+            if self.messageboard.buttons:
+                self.this_screen.blit_buttons(self.messageboard.buttons)
+
             for agent in total_agents:
                 self.this_screen.update_agents(agent, self.musicplayer.get_genre())
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)
+                if agent.state == "leaving":
+                    self.messageboard.leaving(agent.name)
 
             if self.player1.inventory:
                 if self.player1.circle:
                     self.this_screen.update_item_info(self.player1.inventory[0], self.player1)
                     self.this_screen.display.blit(self.player1.inventory[0].give.surface, self.player1.inventory[0].give.rect)
-            
+
             self.this_screen.display.blit(self.this_screen.timer.surface, self.this_screen.timer.rect)
- 
+            self.this_screen.blit_buttons(self.musicplayer.musicplayer_secondary_buttons)
+
             if self.pause == False:
                 self.playable_mingle() 
                 self.npc_mingle()
@@ -201,6 +208,8 @@ class Game:
                 if self.musicplayer.get_genre() is False:
                     agent.personality.return_to_base_mood()
                     agent.personality.reset_rhythm()
+                elif self.musicplayer.now_playing['title'] == '9/11 Was An Inside Job' and (agent.name == 'Bush' or agent.name == 'Bibi'):
+                    agent.leave()
                 else:
                     agent.personality.music(self.musicplayer.get_genre())
                     agent.personality.reset_rhythm()
@@ -328,9 +337,9 @@ class Game:
     """CONTROLS"""
 
     def key_up(self, key):
-        if key == pygame.K_0:
-            for agent in self.nonplayable_agents:
-                agent.personality.display_info = False
+#        if key == pygame.K_0:
+#            for agent in self.nonplayable_agents:
+#                agent.personality.display_info = False
         if key == pygame.K_a or key == pygame.K_d:
             self.player1.change_vector(0, 0)
         if key == pygame.K_w or key == pygame.K_s:
@@ -348,7 +357,7 @@ class Game:
                     self.musicplayer.change_track()
             elif key == pygame.K_0:
                 for agent in self.nonplayable_agents:
-                    agent.personality.display_info = True
+                    agent.personality.display_info = agent.personality.toggle_display_info()
             elif key == pygame.K_e:
                 self.player1.interact()
             elif key == pygame.K_w:

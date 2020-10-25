@@ -107,6 +107,10 @@ class GameScreen(Screen):
     def update_sd(self, sd, calculated_sd):
         sd.change_text("SD: " + str(round(calculated_sd)))
 
+    def display_message_board(self):
+        pygame.draw.rect(self.display, BLACK, (0, 0, SCREEN_WIDTH, 50))
+        pygame.draw.rect(self.display, BLACK, (0, SCREEN_HEIGHT - 50, SCREEN_WIDTH, 50))
+
 class WinScreen(Screen):
     def __init__(self, name, on, display):
         super().__init__(name, on, display)
@@ -159,23 +163,17 @@ class InstructionsScreen(Screen):
         self.instructions_text2 = Button("Press WASD to move", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_text3 = Button("Press 1, 2 and 3 to control the music", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_text4 = Button("Press 0 to see how everyone is feeling", (0, 0), WHITE, BUTTON_FONT_SIZE)
-        self.instructions_text5 = Button("If all of the guests leave, you lose!", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_text6 = Button("Music will affect different personalities", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_text7 = Button("For example, people who are introverted and negative will prefer metal", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_text8 = Button("whereas people who are extroverted and positive like pop", (0, 0), WHITE, BUTTON_FONT_SIZE)
-        self.instructions_text9 = Button("See how long you can keep the party going", (0, 0), WHITE, BUTTON_FONT_SIZE)
-        self.instructions_text10 = Button("Some guests don't mix well!", (0, 0), WHITE, BUTTON_FONT_SIZE)
-        self.instructions_play = Button("Press space to play", (0, 0), WHITE, BUTTON_FONT_SIZE)
+        self.instructions_play = Button("Press space to unpause", (0, 0), WHITE, BUTTON_FONT_SIZE)
         self.instructions_buttons.append(self.instructions_text1)
         self.instructions_buttons.append(self.instructions_text2)
         self.instructions_buttons.append(self.instructions_text3)
         self.instructions_buttons.append(self.instructions_text4)
-        self.instructions_buttons.append(self.instructions_text5)
         self.instructions_buttons.append(self.instructions_text6)
         self.instructions_buttons.append(self.instructions_text7)
         self.instructions_buttons.append(self.instructions_text8)
-        self.instructions_buttons.append(self.instructions_text9)
-        self.instructions_buttons.append(self.instructions_text10)
         self.instructions_buttons.append(self.instructions_play)
 
 

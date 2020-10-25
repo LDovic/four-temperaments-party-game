@@ -27,6 +27,4 @@ https://www.pyinstaller.org/
 
 To build:
 - Add dependencies to main.spec
-- Terminal command: pyinstaller --onedir --noupx main.spec (from same dist as main.spec)
-
-Executable location is dist/main/main
+- pyinstaller --onefile --windowed --noconsole --icon icon.icns --osx-bundle-identifier 'com.ldovic.fourtemperamentspartygame.mac' --name Four\ Temperaments\ Party\ Game main.spec

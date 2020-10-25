@@ -18,8 +18,8 @@ class ItemFactory():
             return RedStripe3(name)
         elif name == 'RedStripe3':
             return RedStripe(name)
-        elif name == 'MysteriousWhitePowder':
-            return MysteriousWhitePowder(name)
+        elif name == 'Cocaine':
+            return Cocaine(name)
         elif name == 'Apple':
             return Apple(name)
         elif name == 'StickOfRock':
@@ -80,13 +80,13 @@ class RedStripe3(Item):
     def apply_item(self, agent):
         agent.personality.get_drunk(2)
 
-class MysteriousWhitePowder(Item):
+class Cocaine(Item):
     def __init__(self, name):
         super().__init__(name)
         self.rect.x = 1200
         self.rect.y = 390
-        self.take = Button("Take mysterious white powder (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
-        self.give = Button("Give mysterious white powder (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
+        self.take = Button("Take Cocaine (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
+        self.give = Button("Give Cocaine (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
 
     def apply_item(self, agent):
         agent.personality.get_magical()
