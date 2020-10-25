@@ -119,8 +119,8 @@ class Personality:
             if self.extroversion < 10:
                 self.extroversion += 1
 
-    def get_magical(self):
-        for x in range(0, 10):
+    def get_magical(self, score):
+        for x in range(0, score):
             if self.positivity < 10:
                 self.positivity += 1
 
@@ -129,6 +129,28 @@ class Personality:
             if self.mood < 100:
                 self.mood += 1
 
+    def weed_paranoia(self):
+        return random.randint(1, self.mood) < self.positivity
+
+    def get_stoned(self, score):
+        if self.weed_paranoia():
+           for x in range(0, score):
+               if self.mood > 0:
+                   self.mood -= 1 
+           for x in range(0, 5):
+               if self.extroversion > 1:
+                   self.extroversion -= 1
+        else:
+           for x in range(0, score):
+               if self.mood < 100: 
+                   self.mood += 1
+           for x in range(0, 2):
+               if self.extroversion > 1:
+                   self.extroversion -= 1
+           for x in range(0, 2):
+               if self.positivity < 10:               
+                   self.positivity += 1
+
 class Sanguine(Personality):
     def __init__(self, temperament, extroversion, positivity):
         super().__init__(temperament, extroversion, positivity)
@@ -136,6 +158,7 @@ class Sanguine(Personality):
         self.hiphop = (True, 5)
         self.pop = (True, 10)
         self.classical = (False, 5)
+
 
 class Choleric(Personality):
     def __init__(self, temperament, extroversion, positivity):

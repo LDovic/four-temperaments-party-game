@@ -26,6 +26,8 @@ class ItemFactory():
             return StickOfRock(name)
         elif name == 'CrabSticks':
             return CrabSticks(name)
+        elif name == 'Weed':
+            return Weed(name)
         else:
             raise ValueError(name)
 
@@ -89,7 +91,7 @@ class Cocaine(Item):
         self.give = Button("Give Cocaine (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
 
     def apply_item(self, agent):
-        agent.personality.get_magical()
+        agent.personality.get_magical(10)
 
 class Apple(Item):
     def __init__(self, name):
@@ -123,3 +125,14 @@ class CrabSticks(Item):
 
     def apply_item(self, agent):
         agent.personality.eat(50)
+
+class Weed(Item):
+    def __init__(self, name):
+        super().__init__(name)
+        self.rect.x = 1200
+        self.rect.y = 450
+        self.take = Button("Take Weed (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
+        self.give = Button("Give Weed (F)", (self.rect.x, self.rect.y), RED, BUTTON_FONT_SIZE)
+
+    def apply_item(self, agent):
+        agent.personality.get_stoned(30)

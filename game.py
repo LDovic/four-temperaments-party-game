@@ -346,9 +346,6 @@ class Game:
     """CONTROLS"""
 
     def key_up(self, key):
-#        if key == pygame.K_0:
-#            for agent in self.nonplayable_agents:
-#                agent.personality.display_info = False
         if key == pygame.K_a or key == pygame.K_d:
             self.player1.change_vector(0, 0)
         if key == pygame.K_w or key == pygame.K_s:
@@ -367,8 +364,6 @@ class Game:
             elif key == pygame.K_0:
                 for agent in self.nonplayable_agents:
                     agent.personality.display_info = agent.personality.toggle_display_info()
-            elif key == pygame.K_e:
-                self.player1.interact()
             elif key == pygame.K_w:
                 self.player1.change_vector(-5, 1)
             elif key == pygame.K_s:

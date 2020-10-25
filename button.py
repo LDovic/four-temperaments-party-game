@@ -45,7 +45,4 @@ class Button:
 
     def update_color(self, name,  attribute):        
         x = round((255/100) * attribute)
-        if attribute < 50:
-            self.surface, self.rect = self.font.render(self.text, (255 - x, 0, 0))
-        elif attribute > 50:
-            self.surface, self.rect = self.font.render(self.text, (0, x, 0))
+        self.surface, self.rect = self.font.render(self.text, (255 - x, x, 0))
