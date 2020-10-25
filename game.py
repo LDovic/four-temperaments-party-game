@@ -103,17 +103,26 @@ class Game:
                 else:
                     agent.item_prox = False
 
-            self.this_screen.display_message_board()
-            if self.messageboard.buttons:
-                self.this_screen.blit_buttons(self.messageboard.buttons)
+            if self.time_elapsed % 5000 == 0:
+                self.messageboard.scroll_buttons()
+            if self.calculate_mean() > 80: 
+                self.messageboard.good_party()
 
             for agent in total_agents:
                 self.this_screen.update_agents(agent, self.musicplayer.get_genre())
                 self.this_screen.update_agent_info(agent)
                 if agent.personality.display_info:
                     self.this_screen.blit_buttons(agent.buttons)
+                if agent.personality.mood < 20:
+                    self.messageboard.low_mood(agent.name)
                 if agent.state == "leaving":
                     self.messageboard.leaving(agent.name)
+                if agent.state == "quitting":
+                    self.messageboard.quitting(agent.name)
+
+            self.this_screen.display_message_board()
+            if self.messageboard.buttons:
+                self.this_screen.blit_buttons(self.messageboard.buttons)
 
             if self.player1.inventory:
                 if self.player1.circle:
@@ -441,6 +450,17 @@ class Game:
     This method is called whenever a screen changes.
     There is functionality for a back button to be used with it but it is not as of yet used.
     """
+
+    def calculate_mean(self):
+        total_agents = self.nonplayable_agents
+
+        if len(total_agents) == 0:
+            return 0
+
+        mean = 0
+        for agent in total_agents:
+            mean += agent.personality.mood
+        return mean / len(total_agents)
 
     def set_screens(self, new_screen):
         self.back_screen = self.this_screen

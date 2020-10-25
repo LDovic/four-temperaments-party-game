@@ -7,7 +7,8 @@ Pygame 'buttons' are objects used for displaying text on screen. All in-game tex
 """
 
 class Button:
-    def __init__(self, text, position, color, size):
+    def __init__(self, text, position, color, size, name = None):
+      self.name = name
       self.text = text
       self.font = self.get_font(size)
       self.surface, self.rect = self.font.render(text, color)
