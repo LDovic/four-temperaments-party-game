@@ -12,6 +12,8 @@ End license.
 
 This is a game based on the <a href="https://en.wikipedia.org/wiki/Four_temperaments" target="_blank">Hippocratic four temperaments personality model</a>. The aim of the game is to throw a successful party with a mix of the four personalities outlined by the model.
 
+Download it for Mac at https://lnoble.itch.io/the-four-temperaments-party-game
+
 Dependencies: pygame, simpleaudio, wavinfo
 
 - pygame - important: pip install pygame==2.0.0.dev6 (developer pygame version) if working with Python 3.8
